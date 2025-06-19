@@ -11,12 +11,17 @@ body{
   background-image: linear-gradient(to bottom right, purple, violet);
 }
 
-.btn-user{
+.btn-white, .btn-purple{
   transition:all ease 0.2s;
   display: inline-block;
 }
-.btn-user:hover {
+.btn-white:hover{
   transform: scale(1.01);
   box-shadow:0 0 10px rgba(255, 255, 255, 0.6);
   text-shadow:0 0 10px rgba(255, 255, 255, 0.6);
+}
+.btn-purple:hover{
+    transform: scale(1.01);
+  box-shadow:0 0 10px rgba(151, 12, 142, 0.6);
+  text-shadow:0 0 10px rgba(151, 12, 142, 0.6);
 }

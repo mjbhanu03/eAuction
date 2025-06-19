@@ -1,3 +1,4 @@
+import Button from "./Button";
 const Header = () => {
   return (
     <>
@@ -19,8 +20,8 @@ const Header = () => {
 
         {/* Content 3 */}
         <div className="flex w-1/4 justify-around"> 
-            <a href="#login" className="btn-user border-[3px] rounded-xl border-white p-2 px-6">Login</a>
-            <a href="#signup" className="btn-user border-[3px] rounded-xl border-white p-2 px-6">Sign Up</a>
+            <Button hrefLink={'#login'} btnName={'Login'}/>
+            <Button hrefLink={'#signup'} btnName={'Sign Up'}/>
         </div>
       </div>
     </>
