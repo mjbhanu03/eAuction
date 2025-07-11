@@ -1,4 +1,5 @@
 import Button from "./Button";
+import LoginModal from "../Components/Login";
 const Header = () => {
   return (
     <>
@@ -20,7 +21,7 @@ const Header = () => {
 
         {/* Content 3 */}
         <div className="flex w-1/4 justify-around"> 
-            <Button hrefLink={'#login'} btnName={'Login'}/>
+            <Button hrefLink={'/login'} btnName={'Login'}/>
             <Button hrefLink={'#signup'} btnName={'Sign Up'}/>
         </div>
       </div>
