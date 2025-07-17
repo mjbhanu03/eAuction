@@ -9,15 +9,15 @@ const Footer = () => {
         {/* Brand + Socials */}
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-1">
-            <span className="text-violet-400">eAuction</span>
+            <span style={{color: 'olive'}}>eAuction</span>
           </h1>
           <div className="flex gap-4 text-xl mt-4">
             {/* <FaFacebookF /> */}
             {/* <FaInstagram /> */}
             {/* <FaXTwitter /> */}
           </div>
-          <p className="mt-8 text-sm text-gray-400">2025 Copright | eAuction</p>
-          <p className="text-sm text-gray-400 mt-2">
+          <p className="mt-8 text-sm" style={{color: 'olive'}}>2025 Copright | eAuction</p>
+          <p className="text-sm mt-2" style={{color: 'olive'}}>
             Distributed by MJ
           </p>
         </div>
@@ -52,13 +52,13 @@ const Footer = () => {
           <p className="text-sm mb-4">
             Subscribe to get the latest news form us
           </p>
-          <div className="flex items-center border border-gray-500 rounded-lg overflow-hidden">
+          <div className="flex items-center border-gray-500 border-2 rounded-lg overflow-hidden">
             <input
               type="email"
               placeholder="Enter Email"
               className="w-full px-4 py-2 bg-transparent  focus:outline-none text-sm"
             />
-            <button className="bg-transparent text-violet-400 px-4">
+            <button className="bg-transparent px-4" style={{color: 'olive'}}>
               {/* <IoSend className="text-lg" /> */}Send
             </button>
           </div>

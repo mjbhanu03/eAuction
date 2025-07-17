@@ -1,10 +1,41 @@
 import Button from "./Button";
 import LoginModal from "../Components/Login";
+import { useEffect } from "react";
+
 const Header = () => {
+  useEffect(() => {
+    const navbar = document.getElementById("navbar");
+    const originalOffset = navbar.offsetTop;
+    let isFixed = false;
+
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+      const navbarTop = navbar.getBoundingClientRect().top;
+
+      // If navbar has scrolled out of view — lock it
+      if (navbarTop <= 0 && !isFixed) {
+        navbar.style.position = "fixed";
+        navbar.style.top = "0";
+        navbar.style.left = "0";
+        navbar.style.right = "0";
+        navbar.style.zIndex = "50";
+        isFixed = true;
+      }
+
+      // If we scroll back down to original position — reset
+      if (currentScrollY <= originalOffset && isFixed) {
+        navbar.style.position = "static";
+        isFixed = false;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   return (
     <>
     {/* Navbar */}
-      <div className="flex navbar p-4 px-30 text-white items-center text-md">
+      <div id='navbar' className=" flex transition-all duration-300 navbar p-4 px-30 text-white items-center text-md">
 
         {/* Content 1 */}
         <div className="w-1/4">

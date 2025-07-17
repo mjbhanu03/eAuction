@@ -5,10 +5,10 @@
 }
 
 body{
-  background-color: rgb(232, 232, 232);
+  background-color: #e4eea1;
 }
 .navbar{
-  background-image: linear-gradient(to bottom right, purple, violet);
+  background-image: linear-gradient(to bottom right, rgb(147, 147, 19), rgb(92, 92, 3));
 }
 
 .btn-white, .btn-purple{
@@ -22,6 +22,25 @@ body{
 }
 .btn-purple:hover{
     transform: scale(1.01);
-  box-shadow:0 0 10px rgba(151, 12, 142, 0.6);
-  text-shadow:0 0 10px rgba(151, 12, 142, 0.6);
+  box-shadow:0 0 10px rgba(113, 141, 5, 0.6);
+  text-shadow:0 0 10px rgba(113, 141, 5, 0.6);
+}
+
+@keyframes fadeInBlink{
+  0%{
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  50%{
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100%{
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-in-blink {
+  animation: fadeInBlink 1.3s ease-in forwards;
 }

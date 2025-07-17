@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Header from "./Components/Header";
 import Button from "./Components/Button";
@@ -6,12 +6,38 @@ import Card from "./Components/Card.jsx";
 import Login from "./Components/Login.jsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Footer from "./Components/Footer.jsx";
+import goOnTop from "./Components/onTop.jsx";
+
 function App() {
+
+  useEffect(()=> {
+    const img = document.getElementById("highlight-section")
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry)=>{
+        if (entry.isIntersecting) {
+          img.classList.add("fade-in-blink");
+          img.classList.remove("opacity-0");
+        } else {
+          // Reset so it can animate again on scroll back
+          img.classList.remove("fade-in-blink");
+          img.classList.add("opacity-0");
+        }
+        })
+      },
+      { threshold: 0.3 }
+    )
+
+    if(img) observer.observe(img);
+    return()=>{
+      if(img) observer.unobserve(img);
+    }
+  },[])
   return (
     <>
     <Router>
       <Routes>
-        <Route path="/" element="App.jsx"/>
         <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
@@ -26,35 +52,37 @@ function App() {
             {/* Tag Line */}
             <h3 className="font-bold text-3xl">
               Secure{" "}
-              <span className="text-purple-500 text-4xl font-extrabold">
-                Bidding
+              <span className="text-4xl font-extrabold" style={{color: 'olive'}}>
+                Bidding, 
               </span>
-              , Smart{" "}
-              <span className="text-purple-500 text-4xl font-extrabold">
+               {" "}Smart{"  "}
+              <span className="text-4xl font-extrabold" style={{color: 'olive'}}>
                 Winning
               </span>
             </h3>
             <br />
             {/* Buy and Sell Line */}
             <h1 className="text-6xl font-bold">
-              Buy and Sell <br />
-              <span className="text-purple-500">Bid of</span>
+              Buy and Sell 
+              <br />
+              <span style={{color: 'olive'}}>Bid of</span>
               <br />
               Your Choice!
             </h1>
             <br /> <br />
-            <div className="flex text-purple-500 space-x-5">
+            <div className="flex space-x-5" style={{color: 'olive'}}>
               <Button hrefLink="#buy" btnName="Buy" colorName="purple" />
               <Button hrefLink="#sell" btnName="Sell" colorName="purple" />
             </div>
           </div>
 
           {/* Content 1 Right Part */}
-          <div className="w-full">
+          <div className="w-full flex justify-end" >
             <img
               src="../public/auction.webp"
               alt="auction"
-              className="w-full h-125"
+              id="highlight-section"
+              className=" h-125 opacity-0"
               />
           </div>
         </div>
@@ -78,7 +106,7 @@ function App() {
             {/* Tag Line */}
             <h3 className="font-bold text-3xl">
               Bid{" "}
-              <span className="text-purple-500 text-4xl font-extrabold">
+              <span className="text-4xl font-extrabold" style={{color: 'olive'}}>
                 With
               </span>
               , Us!
@@ -88,7 +116,7 @@ function App() {
             <h1 className="text-6xl font-bold">
               Successfully launch
               <br />
-              <span className="text-purple-500">your best </span>
+              <span style={{color: 'olive'}}>your best </span>
               <br />
               Biddd!!!
             </h1>
@@ -143,7 +171,7 @@ function App() {
 
           {/* Content 3 Right Part */}
           <div className="w-full flex justify-end">
-            <div className="flex w-100 h-125 bg-gray-500 rounded-2xl"></div>
+            <div className="flex w-100 h-125 rounded-2xl" style={{backgroundColor: 'olive'}}></div>
           </div>
         </div>
         {/* Content 3 */}
@@ -151,7 +179,7 @@ function App() {
         {/* Content 4 */}
         <div className="py-10 w-full flex flex-col items-center">
           <div className="text-3xl font-bold">
-            Bid <span className="text-violet-500">timeline</span>
+            Bid <span style={{color: 'olive'}}>timeline</span>
           </div>
           <div className="text-4xl font-extrabold">
             We can enter at any point or help you all the{" "}
@@ -177,7 +205,7 @@ function App() {
         <div className="py-10 flex w-full items-center">
           {/* Content 6 Left Part */}
           <div className="w-full flex">
-            <div className="flex w-100 h-125 bg-gray-500 rounded-2xl"></div>
+            <div className="flex w-100 h-125 rounded-2xl" style={{backgroundColor: 'olive'}}></div>
           </div>
 
           {/* Content 3 Right Part */}
@@ -186,7 +214,7 @@ function App() {
             {/* Tag Line */}
             <h3 className="font-bold text-3xl">
               Sell{" "}
-              <span className="text-purple-500 text-4xl font-extrabold">
+              <span style={{color: 'olive'}} className="text-4xl font-extrabold">
                 With
               </span>
               , Us!
@@ -196,7 +224,7 @@ function App() {
             <h1 className="text-6xl font-bold">
               Successfully launch
               <br />
-              <span className="text-purple-500">Sell at best </span>
+              <span style={{color: 'olive'}}>Sell at best </span>
               <br />
               Amount!!!
             </h1>
@@ -252,7 +280,7 @@ function App() {
           <div className="text-6xl font-bold">
             <div className="w-full flex justify-center py-5">
               <p>
-                Always By <span className="text-violet-500">Your Side</span>
+                Always By <span style={{color: 'olive'}}>Your Side</span>
               </p>
             </div>
             <div className="w-full flex justify-center py-5">
@@ -351,7 +379,9 @@ function App() {
       </div>
 
       <Footer />      
+    <goOnTop />
     </div>
+
 
                       </>
   );
