@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-*{
-  margin: 0;
-}
 
 body{
   background-color: #e4eea1;
@@ -10,7 +7,9 @@ body{
 .navbar{
   background-image: linear-gradient(to bottom right, rgb(147, 147, 19), rgb(92, 92, 3));
 }
-
+.olive-dark{
+  color:  rgb(92, 92, 3);
+}
 .btn-white, .btn-purple{
   transition:all ease 0.2s;
   display: inline-block;
@@ -43,4 +42,28 @@ body{
 
 .fade-in-blink {
   animation: fadeInBlink 1.3s ease-in forwards;
+}
+
+onTop::hover{
+  background-color: white;
+}
+
+@keyframes fillRight {
+  0%   { clip-path: inset(0 100% 0 0); }
+  50%  { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 0 100%); }
+}
+
+@keyframes fillLeft {
+  0%   { clip-path: inset(0 0 0 100%); }
+  50%  { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 100% 0 0); }
+}
+
+.animate-fill-right {
+  animation: fillLeft 1s forwards ease-in-out;
+}
+
+.animate-fill-left {
+  animation: fillRight 1s forwards ease-in-out;
 }

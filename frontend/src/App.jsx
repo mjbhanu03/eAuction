@@ -3,10 +3,8 @@ import "./App.css";
 import Header from "./Components/Header";
 import Button from "./Components/Button";
 import Card from "./Components/Card.jsx";
-import Login from "./Components/Login.jsx";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Footer from "./Components/Footer.jsx";
-import goOnTop from "./Components/onTop.jsx";
+import OnTop from "./Components/OnTop.jsx";
 
 function App() {
 
@@ -36,12 +34,9 @@ function App() {
   },[])
   return (
     <>
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </Router>
+
     <div className="flex flex-col pt-10 h-max">
+    <OnTop />
       <Header />
 
       <div className="flex flex-col py-10 px-30">
@@ -379,7 +374,6 @@ function App() {
       </div>
 
       <Footer />      
-    <goOnTop />
     </div>
 
 
