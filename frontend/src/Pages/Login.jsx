@@ -1,7 +1,45 @@
 // LoginPage.jsx
-import React from "react";
-
+import React, {useState} from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const LoginPage = ({ onSwitch }) => {
+
+  const navigate = useNavigate()
+
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
+
+  const handleChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try{
+      const res = await fetch('http://localhost:5000/auth/login', {
+        method: 'post',
+        headers:{
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+    const data = await res.json(); 
+    if (res.ok && data.success) {
+      navigate('/', { replace: true });
+    } else {
+      alert(data.message || 'Login failed');
+    }
+
+    } catch(error){
+      console.log("Errorrrr: ", error)
+    }
+  } 
+
   return (
     <div className="bg-white h-screen flex">
       {/* Green section */}
@@ -22,15 +60,21 @@ const LoginPage = ({ onSwitch }) => {
         <h2 className="text-2xl font-semibold olive-dark mb-6 flex flex-col items-center">
           Welcome Back
         </h2>
-        <form className="space-y-8 w-full flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-8 w-full flex flex-col items-center">
           <input
             type="email"
             placeholder="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
           />
           <input
             type="password"
             placeholder="Password"
+            onChange={handleChange}
+            value={formData.password}
+            name="password"
             className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
           />
           <button

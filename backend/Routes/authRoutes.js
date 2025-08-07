@@ -20,4 +20,24 @@ router.post('/register', async (req, res) => {
     }
 })
 
+router.post('/login', async (req, res) => {
+  try{
+    const {email, password} = req.body
+
+    const user = await User.findOne({email})
+    if(user){
+      if(user.password === password){
+        res.status(200).json({user, success: true})
+      }else{
+      res.status(404).json({message: "Password doesn't match!"})
+      }
+    }else{
+      res.status(404).json({success: false, message: 'User not found, Please enter valid Email.'})
+    }
+
+  }catch(error){
+    res.status(500).json({message: 'Sorry, server error'})
+  }
+})
+
 export default router;
