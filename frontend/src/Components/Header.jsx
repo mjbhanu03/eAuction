@@ -1,8 +1,11 @@
 import Button from "./Button";
-import LoginModal from "../Pages/Login";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../../Context/AuthContext";
 
 const Header = () => {
+  
+  let {isLoggedIn} = useContext(AuthContext)    
+  
   useEffect(() => {
     const navbar = document.getElementById("navbar");
     const originalOffset = navbar.offsetTop;
@@ -62,8 +65,14 @@ const Header = () => {
 
         {/* Content 3 */}
         <div className="flex w-1/4 justify-around">
-          <Button hrefLink={"/login"} btnName={"Login"} />
-          <Button hrefLink={"/signup"} btnName={"Sign Up"} />
+          {isLoggedIn ? (
+            <Button hrefLink={"/logout"} btnName={"Logout"} />
+          ) : (
+            <>
+              <Button hrefLink={"/login"} btnName={"Login"} />
+              <Button hrefLink={"/signup"} btnName={"Sign Up"} />
+            </>
+          )}
         </div>
       </div>
     </>

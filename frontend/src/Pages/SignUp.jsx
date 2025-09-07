@@ -29,9 +29,11 @@ const SignUpPage = ({ onSwitch }) => {
         body: JSON.stringify(formData)
       })
       // if(res.data.success){
-        console.log('Submitted', res) 
-        alert('User Created Successfully')
-        navigate('/login')
+        // console.log('Submitted', res) 
+        const data = await res.json();
+        alert(data.message)
+        console.log(data)
+        if(data.message != "User already exist") navigate('/login')
 
       // }
     } catch (error){
@@ -92,6 +94,9 @@ const SignUpPage = ({ onSwitch }) => {
         >
           Log In
         </button>
+                <div className="py-5">
+          <a href="/">Back To Home...</a>
+        </div>
       </div>
 
 

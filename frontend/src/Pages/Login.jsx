@@ -1,8 +1,12 @@
 // LoginPage.jsx
-import React, {useState} from "react";
-import axios from "axios";
+import React, {useContext, useState} from "react";
 import { useNavigate } from "react-router-dom";
+
+import { AuthContext } from "../../Context/AuthContext";
+
 const LoginPage = ({ onSwitch }) => {
+
+  let {login} = useContext(AuthContext)
 
   const navigate = useNavigate()
 
@@ -20,19 +24,24 @@ const LoginPage = ({ onSwitch }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // console.log(formData)
     try{
       const res = await fetch('http://localhost:5000/auth/login', {
         method: 'post',
         headers:{
           'Content-type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(formData)
       })
+      // console.log(formData)
     const data = await res.json(); 
-    if (res.ok && data.success) {
+    if (res.ok && data.message === "Login successful") {
       navigate('/', { replace: true });
+      login(data.user)
+      // console.log(data)
     } else {
-      alert(data.message || 'Login failed');
+      alert('Login failed');
     }
 
     } catch(error){
@@ -40,6 +49,10 @@ const LoginPage = ({ onSwitch }) => {
     }
   } 
 
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log('Yes, i am working...')
+  // }
   return (
     <div className="bg-white h-screen flex">
       {/* Green section */}
@@ -53,6 +66,11 @@ const LoginPage = ({ onSwitch }) => {
         >
           Sign Up
         </button>
+
+        <div className="py-5">
+          <a href="/">Back To Home...</a>
+        </div>
+
       </div>
 
       {/* Form */}
@@ -60,7 +78,7 @@ const LoginPage = ({ onSwitch }) => {
         <h2 className="text-2xl font-semibold olive-dark mb-6 flex flex-col items-center">
           Welcome Back
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-8 w-full flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-8 w-full flex flex-col items-center" method="post">
           <input
             type="email"
             placeholder="Email"
@@ -68,6 +86,7 @@ const LoginPage = ({ onSwitch }) => {
             value={formData.email}
             onChange={handleChange}
             className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+            required
           />
           <input
             type="password"
@@ -76,6 +95,7 @@ const LoginPage = ({ onSwitch }) => {
             value={formData.password}
             name="password"
             className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+            required
           />
           <button
             type="submit"
@@ -84,6 +104,7 @@ const LoginPage = ({ onSwitch }) => {
             Log In
           </button>
         </form>
+
       </div>
     </div>
   );
