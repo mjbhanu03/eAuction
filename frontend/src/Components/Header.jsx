@@ -53,13 +53,13 @@ const Header = () => {
             <a href="#">Home</a>
           </div>
           <div>
-            <a href="#">About Us</a>
+            <a href="/profile">Profile</a>
           </div>
           <div>
             <a href="#">Contact Us</a>
           </div>
           <div>
-            <a href="#">Enjoy</a>
+            <a href="#">About Us</a>
           </div>
         </div>
 
