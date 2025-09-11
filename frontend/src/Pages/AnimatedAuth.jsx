@@ -32,7 +32,7 @@ const AnimatedAuth = () => {
     <div className="relative w-full h-screen overflow-hidden">
       {/* Animated Overlay */}
       <div
-        className={`absolute inset-0 bg-[olive] z-50 transition-transform duration-500 ${
+        className={`absolute inset-0 bg-[#056973] z-50 transition-transform duration-500 ${
           isAnimating
             ? "translate-x-0"
             : showLogin

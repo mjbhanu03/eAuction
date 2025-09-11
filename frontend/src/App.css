@@ -2,13 +2,13 @@
 
 
 body{
-  background-color: #e4eea1;
+  background-color: #fdf8f5;
 }
 .navbar{
-  background-image: linear-gradient(to bottom right, rgb(147, 147, 19), rgb(92, 92, 3));
+  background-image: linear-gradient(to bottom right, #056973, #0fc9db);
 }
 .olive-dark{
-  color:  rgb(92, 92, 3);
+  color:  #056973;
 }
 .btn-white, .btn-purple{
   transition:all ease 0.2s;
@@ -21,8 +21,8 @@ body{
 }
 .btn-purple:hover{
     transform: scale(1.01);
-  box-shadow:0 0 10px rgba(113, 141, 5, 0.6);
-  text-shadow:0 0 10px rgba(113, 141, 5, 0.6);
+  box-shadow:0 0 10px#056973;
+  text-shadow:0 0 10px #056973;
 }
 
 @keyframes fadeInBlink{
@@ -67,3 +67,29 @@ onTop::hover{
 .animate-fill-left {
   animation: fillRight 1s forwards ease-in-out;
 }
+
+.bid-btn {
+  background: linear-gradient(90deg, #056973, #41b8c4, #73eefa);
+  background-size: 200% 200%;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.bid-btn:hover {
+  animation: gradientMove 0.5s forwards;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 30%; }
+  50% { background-position: 30% 40%; }
+  100% { background-position: 40% 50%; }
+}
+

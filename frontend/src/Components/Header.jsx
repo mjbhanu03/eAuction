@@ -3,9 +3,8 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "../../Context/AuthContext";
 
 const Header = () => {
-  
-  let {isLoggedIn} = useContext(AuthContext)    
-  
+  let { isLoggedIn } = useContext(AuthContext);
+
   useEffect(() => {
     const navbar = document.getElementById("navbar");
     const originalOffset = navbar.offsetTop;
@@ -15,7 +14,6 @@ const Header = () => {
       const currentScrollY = window.scrollY;
       const navbarTop = navbar.getBoundingClientRect().top;
 
-      // If navbar has scrolled out of view — lock it
       if (navbarTop <= 0 && !isFixed) {
         navbar.style.position = "fixed";
         navbar.style.top = "0";
@@ -25,7 +23,6 @@ const Header = () => {
         isFixed = true;
       }
 
-      // If we scroll back down to original position — reset
       if (currentScrollY <= originalOffset && isFixed) {
         navbar.style.position = "static";
         isFixed = false;
@@ -35,36 +32,39 @@ const Header = () => {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
   return (
     <>
       {/* Navbar */}
-      <div
+      <nav
         id="navbar"
-        className=" flex transition-all duration-300 navbar p-4 px-30 text-white items-center text-md"
+        className="navbar shadow-md border-b border-gray-200 flex items-center justify-between px-8 py-4 sticky top-0 z-50"
       >
-        {/* Content 1 */}
-        <div className="w-1/4">
-          <p className="">LOGO</p>
+        {/* Logo */}
+        <div className="text-2xl font-bold olive-dark tracking-wide">
+          <a href="/">
+          eAuction
+          </a>
         </div>
 
-        {/* Content 2 */}
-        <div className="flex justify-around w-3/4">
-          <div>
-            <a href="#">Home</a>
-          </div>
-          <div>
-            <a href="/profile">Profile</a>
-          </div>
-          <div>
-            <a href="#">Contact Us</a>
-          </div>
-          <div>
-            <a href="#">About Us</a>
-          </div>
+        {/* Navigation Links */}
+        <div className="hidden md:flex gap-8 text-white font-medium">
+          <a href="/" className="hover:text-indigo-600 transition">
+            Home
+          </a>
+          <a href="/profile" className="hover:text-indigo-600 transition">
+            Profile
+          </a>
+          <a href="#" className="hover:text-indigo-600 transition">
+            Contact Us
+          </a>
+          <a href="#" className="hover:text-indigo-600 transition">
+            About Us
+          </a>
         </div>
 
-        {/* Content 3 */}
-        <div className="flex w-1/4 justify-around">
+        {/* Auth Buttons */}
+        <div className="flex gap-4">
           {isLoggedIn ? (
             <Button hrefLink={"/logout"} btnName={"Logout"} />
           ) : (
@@ -74,7 +74,7 @@ const Header = () => {
             </>
           )}
         </div>
-      </div>
+      </nav>
     </>
   );
 };

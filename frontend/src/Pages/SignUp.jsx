@@ -42,7 +42,7 @@ const SignUpPage = ({ onSwitch }) => {
   }
 
   return (
-    <div className="bg-white h-screen flex">
+    <div className="h-screen flex">
             {/* Form */}
       <div className="w-2/3 p-10 flex flex-col justify-center">
         <h2 className="text-2xl font-semibold olive-dark mb-6 flex flex-col items-center">

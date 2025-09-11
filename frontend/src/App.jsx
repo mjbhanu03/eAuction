@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "./App.css";
 import Header from "./Components/Header";
 import Button from "./Components/Button";
-import Card from "./Components/Card.jsx";
 import Footer from "./Components/Footer.jsx";
 import OnTop from "./Components/OnTop.jsx";
+import AutoScroll from "./Components/AutoScroll.jsx";
 
 function App() {
 
@@ -47,11 +47,11 @@ function App() {
             {/* Tag Line */}
             <h3 className="font-bold text-3xl">
               Secure{" "}
-              <span className="text-4xl font-extrabold" style={{color: 'olive'}}>
+              <span className="text-4xl font-extrabold" style={{color: '#056973'}}>
                 Bidding, 
               </span>
                {" "}Smart{"  "}
-              <span className="text-4xl font-extrabold" style={{color: 'olive'}}>
+              <span className="text-4xl font-extrabold" style={{color: '#056973'}}>
                 Winning
               </span>
             </h3>
@@ -60,13 +60,13 @@ function App() {
             <h1 className="text-6xl font-bold">
               Buy and Sell 
               <br />
-              <span style={{color: 'olive'}}>Bid of</span>
+              <span style={{color: '#056973'}}>Bid of</span>
               <br />
               Your Choice!
             </h1>
             <br /> <br />
-            <div className="flex space-x-5" style={{color: 'olive'}}>
-              <Button hrefLink="#buy" btnName="Buy" colorName="purple" />
+            <div className="flex space-x-5" style={{color: '#056973'}}>
+              <Button hrefLink="/auctions" btnName="Buy" colorName="purple" />
               <Button hrefLink="#sell" btnName="Sell" colorName="purple" />
             </div>
           </div>
@@ -84,14 +84,7 @@ function App() {
         {/* Content 1 */}
 
         {/* Content 2 */}
-        <div className="w-full grid grid-flow-col gap-20 py-10">
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-        </div>
+        <AutoScroll />
         {/* Content 2 */}
 
         {/* Content 3 */}
@@ -101,7 +94,7 @@ function App() {
             {/* Tag Line */}
             <h3 className="font-bold text-3xl">
               Bid{" "}
-              <span className="text-4xl font-extrabold" style={{color: 'olive'}}>
+              <span className="text-4xl font-extrabold olive-dark" >
                 With
               </span>
               , Us!
@@ -111,7 +104,7 @@ function App() {
             <h1 className="text-6xl font-bold">
               Successfully launch
               <br />
-              <span style={{color: 'olive'}}>your best </span>
+              <span className="olive-dark">your best </span>
               <br />
               Biddd!!!
             </h1>
@@ -155,7 +148,7 @@ function App() {
                       alt="Connect Golobally"
                       />
                   </div>
-                  <div className="">
+                  <div>
                     Connect <br />
                     Globally
                   </div>
@@ -166,7 +159,7 @@ function App() {
 
           {/* Content 3 Right Part */}
           <div className="w-full flex justify-end">
-            <div className="flex w-100 h-125 rounded-2xl" style={{backgroundColor: 'olive'}}></div>
+            <div className="flex w-100 h-125 rounded-2xl navbar" ></div>
           </div>
         </div>
         {/* Content 3 */}
@@ -174,7 +167,7 @@ function App() {
         {/* Content 4 */}
         <div className="py-10 w-full flex flex-col items-center">
           <div className="text-3xl font-bold">
-            Bid <span style={{color: 'olive'}}>timeline</span>
+            Bid <span className="olive-dark">timeline</span>
           </div>
           <div className="text-4xl font-extrabold">
             We can enter at any point or help you all the{" "}
@@ -200,7 +193,7 @@ function App() {
         <div className="py-10 flex w-full items-center">
           {/* Content 6 Left Part */}
           <div className="w-full flex">
-            <div className="flex w-100 h-125 rounded-2xl" style={{backgroundColor: 'olive'}}></div>
+            <div className="flex w-100 h-125 rounded-2xl navbar" ></div>
           </div>
 
           {/* Content 3 Right Part */}
@@ -209,7 +202,7 @@ function App() {
             {/* Tag Line */}
             <h3 className="font-bold text-3xl">
               Sell{" "}
-              <span style={{color: 'olive'}} className="text-4xl font-extrabold">
+              <span className="text-4xl font-extrabold olive-dark">
                 With
               </span>
               , Us!
@@ -219,7 +212,7 @@ function App() {
             <h1 className="text-6xl font-bold">
               Successfully launch
               <br />
-              <span style={{color: 'olive'}}>Sell at best </span>
+              <span className="olive-dark">Sell at best </span>
               <br />
               Amount!!!
             </h1>
@@ -275,7 +268,7 @@ function App() {
           <div className="text-6xl font-bold">
             <div className="w-full flex justify-center py-5">
               <p>
-                Always By <span style={{color: 'olive'}}>Your Side</span>
+                Always By <span className="olive-dark">Your Side</span>
               </p>
             </div>
             <div className="w-full flex justify-center py-5">

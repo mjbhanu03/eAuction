@@ -54,7 +54,7 @@ const LoginPage = ({ onSwitch }) => {
   //   console.log('Yes, i am working...')
   // }
   return (
-    <div className="bg-white h-screen flex">
+    <div className=" h-screen flex">
       {/* Green section */}
       <div className="w-1/3 navbar text-white flex flex-col items-center justify-center p-6 text-center">
         

@@ -8,24 +8,24 @@ const Footer = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
         {/* Brand + Socials */}
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-1">
-            <span style={{color: 'olive'}}>eAuction</span>
+          <h1 className="text-4xl font-bold flex items-center gap-1">
+            <span className="olive-dark">eAuction</span>
           </h1>
-          <div className="flex gap-4 text-xl mt-4">
+          <div className="flex gap-4 text-2xl mt-4">
             {/* <FaFacebookF /> */}
             {/* <FaInstagram /> */}
             {/* <FaXTwitter /> */}
           </div>
-          <p className="mt-8 text-sm" style={{color: 'olive'}}>2025 Copright | eAuction</p>
-          <p className="text-sm mt-2" style={{color: 'olive'}}>
+          <p className="mt-8 text-lg olive-dark">2025 Copright | eAuction</p>
+          <p className="text-lg mt-2 olive-dark">
             Distributed by MJ
           </p>
         </div>
 
         {/* Links */}
         <div>
-          <h3 className="font-semibold mb-4">Links</h3>
-          <ul className="space-y-2 text-sm">
+          <h3 className="font-bold mb-4 text-xl olive-dark">Links</h3>
+          <ul className="space-y-2 text-lg">
             <li>Buy & Sell</li>
             <li>Development</li>
             <li>Work</li>
@@ -37,8 +37,8 @@ const Footer = () => {
 
         {/* Information */}
         <div>
-          <h3 className="font-semibold mb-4">Information</h3>
-          <ul className="space-y-2 text-sm">
+          <h3 className="font-bold mb-4 text-xl olive-dark">Information</h3>
+          <ul className="space-y-2 text-lg">
             <li>Terms</li>
             <li>Disclosures</li>
             <li>Disclosures</li>
@@ -48,7 +48,7 @@ const Footer = () => {
 
         {/* Subscribe */}
         <div>
-          <h3 className="font-semibold mb-4">Subscribe</h3>
+          <h3 className="font-bold mb-4 text-xl olive-dark">Subscribe</h3>
           <p className="text-sm mb-4">
             Subscribe to get the latest news form us
           </p>
@@ -58,7 +58,7 @@ const Footer = () => {
               placeholder="Enter Email"
               className="w-full px-4 py-2 bg-transparent  focus:outline-none text-sm"
             />
-            <button className="bg-transparent px-4" style={{color: 'olive'}}>
+            <button className="bg-transparent px-4 olive-dark">
               {/* <IoSend className="text-lg" /> */}Send
             </button>
           </div>

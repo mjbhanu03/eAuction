@@ -1,6 +1,6 @@
 const Card = () => {
   return(
-    <div className="flex flex-col border-0 rounded-3xl text-white p-4 w-56 h-26 justify-center" style={{backgroundColor: 'olive'}}>
+    <div className="flex flex-col border-0 rounded-3xl text-white p-4 w-56 h-26 justify-center navbar" >
       {/* Left Content */}
       <div className="flex justify-around h-full items-center">
         <div className="w-1/3">Hey</div>

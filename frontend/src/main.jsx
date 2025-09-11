@@ -7,18 +7,18 @@ import AnimatedAuth from "./Pages/AnimatedAuth.jsx";
 import { AuthContext, AuthProvider } from "../Context/AuthContext.jsx";
 import { Logout } from "./Pages/Logout.jsx";
 import { Profile } from "./Pages/Profile.jsx";
+import AuctionCard from "./Pages/AuctionsPage.jsx";
+import BidDetails from "./Pages/BidDetails.jsx";
 
 const Root = () => {
   let { isLoggedIn, isLoading } = useContext(AuthContext);
-  console.log(isLoggedIn)
-  if(isLoading){
-    console.log('wait')
-    return "Wait"
-  }
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/auctions" element={<AuctionCard />} />
+        <Route path="/biddetails" element={<BidDetails />}/>
         <Route
           path="/login"
           element={isLoggedIn ? <Navigate to="/" replace/> : <AnimatedAuth page="login" />}
@@ -29,7 +29,7 @@ const Root = () => {
         />
         <Route
           path="/profile"
-          element={isLoggedIn ? <Profile /> : <Navigate to="/" replace />}
+          element={isLoggedIn ? <Profile /> : <App />}
         />
         <Route path="/logout" element={!isLoggedIn ? <App /> : <Logout />} />
       </Routes>
