@@ -55,10 +55,10 @@ const Header = () => {
           <a href="/profile" className="hover:text-indigo-600 transition">
             Profile
           </a>
-          <a href="#" className="hover:text-indigo-600 transition">
+          <a href="/contactus" className="hover:text-indigo-600 transition">
             Contact Us
           </a>
-          <a href="#" className="hover:text-indigo-600 transition">
+          <a href="/aboutus" className="hover:text-indigo-600 transition">
             About Us
           </a>
         </div>

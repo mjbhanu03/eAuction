@@ -9,6 +9,8 @@ import { Logout } from "./Pages/Logout.jsx";
 import { Profile } from "./Pages/Profile.jsx";
 import AuctionCard from "./Pages/AuctionsPage.jsx";
 import BidDetails from "./Pages/BidDetails.jsx";
+import About from "./Pages/AboutUs.jsx";
+import ContactUs from "./Pages/ContactUs.jsx";
 
 const Root = () => {
   let { isLoggedIn, isLoading } = useContext(AuthContext);
@@ -19,6 +21,8 @@ const Root = () => {
         <Route path="/" element={<App />} />
         <Route path="/auctions" element={<AuctionCard />} />
         <Route path="/biddetails" element={<BidDetails />}/>
+        <Route path="/aboutus" element={<About />}/>
+        <Route path="/contactus" element={<ContactUs />}/>
         <Route
           path="/login"
           element={isLoggedIn ? <Navigate to="/" replace/> : <AnimatedAuth page="login" />}
