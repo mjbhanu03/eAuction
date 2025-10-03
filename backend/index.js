@@ -2,11 +2,11 @@ import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
 import authRoutes from "./Routes/authRoutes.js"
-import connectDB from "./Config/db.js"
+import db from "./Config/db.js"
 import cookieParser from "cookie-parser"
 
 dotenv.config();
-connectDB();
+// db();
 
 
 const app = express()
@@ -25,4 +25,12 @@ app.listen(process.env.PORT, ()=>
   console.log(`Server running on port ${PORT}`)
 )
 app.use("/auth", authRoutes)
-
+app.get("/", async (req, res) => {
+  try {
+    const [results, metadata] = await db.query("SELECT * FROM regions");
+    res.json(results);
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
