@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
     let filename;
 
     // For profile photo
-    if (fieldName === "profile") {
+    if (fieldName === "document_type") {
       filename = `${req.body.name?.toLowerCase() || "user"}-profile${ext}`;
     }
 

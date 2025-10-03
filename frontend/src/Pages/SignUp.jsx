@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SignUpPage = ({ onSwitch }) => {
@@ -18,19 +18,30 @@ const SignUpPage = ({ onSwitch }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const cities = [
-    { id: "1", name: "New York" },
-    { id: "2", name: "Los Angeles" },
-    { id: "3", name: "Chicago" },
-    // Add more cities as needed
-  ];
+  const [cities, setCities] = useState([]);
+
+  // Fetch Cities
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const data = await fetch("http://localhost:5000/auth/cities");
+        const jsonData = await data.json();
+
+        setCities(jsonData);
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    };
+
+    fetchCities();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "doc") {
+    if (name === "document_type") {
       setFormData((prev) => ({
         ...prev,
-        doc: files[0] || null,
+        document_type: files[0] || null,
       }));
     } else {
       setFormData((prev) => ({
@@ -49,7 +60,7 @@ const SignUpPage = ({ onSwitch }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log(formData)
     // Simple confirm password validation
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
@@ -130,84 +141,83 @@ const SignUpPage = ({ onSwitch }) => {
             required
           />
           <div className="w-2/4 flex space-x-4">
-          {/* Password with show/hide */}
-          <div className="relative w-2/4">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              name="password"
-              className="w-full px-4 py-3 rounded-full bg-gray-200 focus:outline-none pr-10"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
-              tabIndex={-1}
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </button>
-          </div>
-
-          {/* Confirm Password with show/hide */}
-          <div className="relative w-2/4">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              name="confirmPassword"
-              className="w-full px-4 py-3 rounded-full bg-gray-200 focus:outline-none pr-10"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
-              tabIndex={-1}
-            >
-              {showConfirmPassword ? "🙈" : "👁️"}
-            </button>
-          </div>
-          </div>
-          <div className="w-2/4 flex space-x-4">
-
-          <select
-            name="city_id"
-            value={formData.city_id}
-            onChange={handleChange}
-            className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
-            required
-          >
-            <option value="">Select City</option>
-            {cities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-
-          {/* File upload with cancel */}
-          <div className="w-2/4 flex items-center space-x-4">
-            <input
-              type="file"
-              name="document_type"
-              onChange={handleChange}
-              className="flex-1 px-4 py-3 rounded-full bg-gray-200 hover:cursor-pointer"
-              accept=".pdf,.doc,.docx,.jpg,.png"
-            />
-            {formData.document_type && (
+            {/* Password with show/hide */}
+            <div className="relative w-2/4">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                name="password"
+                className="w-full px-4 py-3 rounded-full bg-gray-200 focus:outline-none pr-10"
+                required
+              />
               <button
                 type="button"
-                onClick={clearDoc}
-                className="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+                tabIndex={-1}
               >
-                Cancel
+                {showPassword ? "🙈" : "👁️"}
               </button>
-            )}
+            </div>
+
+            {/* Confirm Password with show/hide */}
+            <div className="relative w-2/4">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                name="confirmPassword"
+                className="w-full px-4 py-3 rounded-full bg-gray-200 focus:outline-none pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
+          <div className="w-2/4 flex space-x-4">
+            <select
+              name="city_id"
+              value={formData.city_id}
+              onChange={handleChange}
+              className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+              required
+            >
+              <option value="">Select City</option>
+              {cities.map((city) => (
+                <option key={city.city_id} value={city.city_id}>
+                  {`${city.city_name}, ${city.state_name}, ${city.country_name}`}
+                </option>
+              ))}
+            </select>
+
+            {/* File upload with cancel */}
+            <div className="w-2/4 flex items-center space-x-4">
+              <input
+                type="file"
+                name="document_type"
+                onChange={handleChange}
+                className="flex-1 px-4 py-3 rounded-full bg-gray-200 hover:cursor-pointer"
+                accept=".pdf,.doc,.docx,.jpg,.png"
+              />
+              {formData.document_type && (
+                <button
+                  type="button"
+                  onClick={clearDoc}
+                  className="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </div>
           <button
             type="submit"

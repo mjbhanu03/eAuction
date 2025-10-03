@@ -4,19 +4,23 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import verifyJWT from "../Middleware/authMiddleware.js";
 import upload from "../Middleware/multer.js";
+import getCitiesWithHierarchy from "../Models/Address.js";
+// import db from "../Config/db";
+
 const router = express.Router();
 
-
-// ✅ REGISTER USER
-router.post('/register', upload.single("profile"), async (req, res) => {
+// REGISTER USER
+router.post("/register", upload.single("document_type"), async (req, res) => {
   try {
     const { name, surname, number, email, password, city_id } = req.body;
 
     const existing = await User.findOne({ where: { email } });
-    if (existing) return res.status(400).json({ message: "User already exists!" });
+    if (existing)
+      return res.status(400).json({ message: "User already exists!" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
+console.log("req.body:", req.body);
+console.log("req.file:", req.file);
     await User.create({
       name,
       surname,
@@ -24,30 +28,30 @@ router.post('/register', upload.single("profile"), async (req, res) => {
       status: "Requested",
       email,
       password: hashedPassword,
-      city_id,
+      city_id: parseInt(city_id, 10),
       document_type: req.file?.filename || "", // Save file name in DB
     });
 
     return res.status(201).json({ message: "User created successfully!" });
   } catch (error) {
-    console.error("Backend Error:", error);
-    return res.status(500).json({ message: "Sorry, server error" });
-  }
+  console.error("Backend Error:", error.stack || error.message || error);
+  return res.status(500).json({ message: "Server error", error: error.message });
+}
 });
 
-
 // LOGIN USER
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } }); 
+    const user = await User.findOne({ where: { email } });
 
     if (!user) return res.status(400).json({ message: "User not found!" });
 
-    const isMatch = await bcrypt.compare(password, user.password );
-    console.log(isMatch)
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch);
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -57,7 +61,7 @@ router.post('/login', async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, 
+      secure: false,
       sameSite: "strict",
       maxAge: 60 * 60 * 1000, // 1 hour
     });
@@ -70,39 +74,40 @@ router.post('/login', async (req, res) => {
         email: user.email,
       },
     });
-
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Sorry, server error" });
   }
 });
 
-
-// ✅ LOGOUT
+// LOGOUT
 router.post("/logout", (req, res) => {
   res.clearCookie("token");
   res.json({ message: "Logged out successfully" });
 });
 
-
-// ✅ GET PROFILE (Protected Route)
+// GET PROFILE (Protected Route)
 router.get("/profile", verifyJWT, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
       attributes: { exclude: ["password"] },
     });
 
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
 
     res.json({ success: true, user });
   } catch (error) {
     console.error("Profile error:", error);
-    res.status(500).json({ success: false, message: "Failed to load profile." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to load profile." });
   }
 });
 
-
-// ✅ GET ALL USERS (For Admin or Debug)
+// GET ALL USERS (For Admin or Debug)
 router.get("/", async (req, res) => {
   try {
     const users = await User.findAll({
@@ -113,6 +118,16 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error("Fetch users error:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/cities", async (req, res) => {
+  try {
+    const cities = await getCitiesWithHierarchy();
+    res.json(cities);
+  } catch (error) {
+    // res.status(404).json({ message: "Internal Server Error" });
+    console.log(error)
   }
 });
 
