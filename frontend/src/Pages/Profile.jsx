@@ -122,7 +122,7 @@ export const Profile = () => {
 
             {/* City */}
             <div className="w-full text-left">
-              <label className="text-gray-700 font-semibold">City</label>
+              <label className="text-gray-700 font-semibold">Address</label>
               {isEditing ? (
                 <input
                   type="text"
@@ -132,27 +132,9 @@ export const Profile = () => {
                   className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                 />
               ) : (
-                <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].city_name}</div>
+                <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].city_name},  {user.city_id[0].state_name},  {user.city_id[0].country_name},<br />  {user.city_id[0].subregion_name}, {user.city_id[0].region_name} </div>
               )}
-
-            </div>
-
-            <div className="w-full text-left">
-              <label className="text-gray-700 font-semibold">State</label>
-                <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].state_name}</div>
-            </ div>
-
-            <div className="w-full text-left">
-              <label className="text-gray-700 font-semibold">Country</label>
-                <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].country_name}</div>
-            </div>
-            <div className="w-full text-left">
-              <label className="text-gray-700 font-semibold">Sub Region</label>
-                  <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].subregion_name}</div>
-            </div>
-            <div className="w-full text-left">
-              <label className="text-gray-700 font-semibold">Region</label>
-                    <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].region_name}</div>
+              
             </div>
 
             {/* Account Status */}
