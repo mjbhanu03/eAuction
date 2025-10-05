@@ -2,7 +2,6 @@ import express from "express";
 import User from "../Models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import verifyJWT from "../Middleware/authMiddleware.js";
 import upload from "../Middleware/multer.js";
 import getCitiesWithHierarchy from "../Models/Address.js";
 // import db from "../Config/db";
@@ -19,8 +18,7 @@ router.post("/register", upload.single("document_type"), async (req, res) => {
       return res.status(400).json({ message: "User already exists!" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-console.log("req.body:", req.body);
-console.log("req.file:", req.file);
+
     await User.create({
       name,
       surname,
@@ -49,7 +47,7 @@ router.post("/login", async (req, res) => {
     if (!user) return res.status(400).json({ message: "User not found!" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(isMatch);
+
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
@@ -87,23 +85,34 @@ router.post("/logout", (req, res) => {
 });
 
 // GET PROFILE (Protected Route)
-router.get("/profile", verifyJWT, async (req, res) => {
+router.get("/profile/:email", async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id, {
+    const { email } = req.params;
+
+    // Fetch user profile data
+    const user = await User.findOne({
+      where: { email: email },
       attributes: { exclude: ["password"] },
     });
 
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-    res.json({ success: true, user });
+    // Fetch cities and hierarchical data
+    const citiesWithHierarchy = await getCitiesWithHierarchy(user.city_id);
+
+    // Map the result to a user profile with city details
+    const userProfile = {
+      ...user.dataValues,
+      city_id: citiesWithHierarchy || {}
+    };
+
+    // Send the response
+    res.json({ success: true, user: userProfile });
   } catch (error) {
     console.error("Profile error:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to load profile." });
+    res.status(500).json({ success: false, message: "Failed to load profile." });
   }
 });
 
