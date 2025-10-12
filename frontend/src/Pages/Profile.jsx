@@ -132,7 +132,7 @@ export const Profile = () => {
                   className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                 />
               ) : (
-                <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].city_name},  {user.city_id[0].state_name},  {user.city_id[0].country_name},<br />  {user.city_id[0].subregion_name}, {user.city_id[0].region_name} </div>
+                <div className="border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500">{user.city_id[0].city_name},  {user.city_id[0].state_name},  {user.city_id[0].country_name},<br />                             {user.city_id[0].subregion_name}, {user.city_id[0].region_name} </div>
               )}
               
             </div>

@@ -11,6 +11,7 @@ import AuctionCard from "./Pages/AuctionsPage.jsx";
 import BidDetails from "./Pages/BidDetails.jsx";
 import About from "./Pages/AboutUs.jsx";
 import ContactUs from "./Pages/ContactUs.jsx";
+import SellForm from "./Pages/SellForm.jsx"
 
 const Root = () => {
   let { isLoggedIn, isLoading } = useContext(AuthContext);
@@ -23,6 +24,7 @@ const Root = () => {
         <Route path="/biddetails" element={<BidDetails />}/>
         <Route path="/aboutus" element={<About />}/>
         <Route path="/contactus" element={<ContactUs />}/>
+        <Route path="/placebid" element={<SellForm />}/>
         <Route
           path="/login"
           element={isLoggedIn ? <Navigate to="/" replace/> : <AnimatedAuth page="login" />}
