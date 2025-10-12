@@ -11,6 +11,8 @@ import AuctionCard from "./Pages/AuctionsPage.jsx";
 import BidDetails from "./Pages/BidDetails.jsx";
 import About from "./Pages/AboutUs.jsx";
 import ContactUs from "./Pages/ContactUs.jsx";
+import AdminApp from "./admin/AdminApp.jsx";
+
 
 const Root = () => {
   let { isLoggedIn, isLoading } = useContext(AuthContext);
@@ -36,6 +38,10 @@ const Root = () => {
           element={isLoggedIn ? <Profile /> : <App />}
         />
         <Route path="/logout" element={!isLoggedIn ? <App /> : <Logout />} />
+
+        {/* ================= ADMIN SIDE ================= */}
+        <Route path="/admin/*" element={<AdminApp />} />
+        
       </Routes>
     </Router>
   );
