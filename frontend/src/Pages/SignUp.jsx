@@ -1,61 +1,135 @@
-// SignUpPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SignUpPage = ({ onSwitch }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  })
+    name: "",
+    surname: "",
+    number: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    city_id: "",
+    document_type: null, // for file upload
+  });
+
+  // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [cities, setCities] = useState([]);
+
+  // Fetch Cities
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const data = await fetch("http://localhost:5000/auth/cities");
+        const jsonData = await data.json();
+
+        setCities(jsonData);
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    };
+
+    fetchCities();
+  }, []);
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    const { name, value, files } = e.target;
+    if (name === "document_type") {
+      setFormData((prev) => ({
+        ...prev,
+        document_type: files[0] || null,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const clearDoc = () => {
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+      document_type: null,
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    try{
-      const res = await fetch('http://localhost:5000/auth/register', {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      })
-      // if(res.data.success){
-        // console.log('Submitted', res) 
-        const data = await res.json();
-        alert(data.message)
-        console.log(data)
-        if(data.message != "User already exist") navigate('/login')
-
-      // }
-    } catch (error){
-      console.error('Error:', error)
+    e.preventDefault();
+    console.log(formData)
+    // Simple confirm password validation
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
     }
-  }
+
+    try {
+      // Using FormData to handle file upload
+      const data = new FormData();
+      for (const key in formData) {
+        if (formData[key] !== null) {
+          data.append(key, formData[key]);
+        }
+      }
+
+      const res = await fetch("http://localhost:5000/auth/register", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await res.json();
+      alert(result.message);
+      console.log(result);
+      if (result.message !== "User already exist") navigate("/login");
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   return (
     <div className="h-screen flex">
-            {/* Form */}
+      {/* Form */}
       <div className="w-2/3 p-10 flex flex-col justify-center">
         <h2 className="text-2xl font-semibold olive-dark mb-6 flex flex-col items-center">
           Create a New Account
         </h2>
-        <form  onSubmit={handleSubmit} className="space-y-8 w-full flex flex-col items-center">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-8 w-full flex flex-col items-center"
+        >
+          <div className="w-2/4 flex space-x-4">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={formData.name}
+              onChange={handleChange}
+              name="name"
+              className="w-1/2 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Surname"
+              value={formData.surname}
+              onChange={handleChange}
+              name="surname"
+              className="w-1/2 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+              required
+            />
+          </div>
+
           <input
-            type="text"
-            placeholder="Full Name"
-            value={formData.name}
+            type="number"
+            placeholder="Phone Number"
+            value={formData.number}
             onChange={handleChange}
-            name = 'name'
+            name="number"
             className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+            required
           />
           <input
             type="email"
@@ -64,15 +138,87 @@ const SignUpPage = ({ onSwitch }) => {
             onChange={handleChange}
             name="email"
             className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+            required
           />
-          <input
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Password"
-            name="password"
-            className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
-          />
+          <div className="w-2/4 flex space-x-4">
+            {/* Password with show/hide */}
+            <div className="relative w-2/4">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                name="password"
+                className="w-full px-4 py-3 rounded-full bg-gray-200 focus:outline-none pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+                tabIndex={-1}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+
+            {/* Confirm Password with show/hide */}
+            <div className="relative w-2/4">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                name="confirmPassword"
+                className="w-full px-4 py-3 rounded-full bg-gray-200 focus:outline-none pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+          </div>
+          <div className="w-2/4 flex space-x-4">
+            <select
+              name="city_id"
+              value={formData.city_id}
+              onChange={handleChange}
+              className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+              required
+            >
+              <option value="">Select City</option>
+              {cities.map((city) => (
+                <option key={city.city_id} value={city.city_id}>
+                  {`${city.city_name}, ${city.state_name}, ${city.country_name}`}
+                </option>
+              ))}
+            </select>
+
+            {/* File upload with cancel */}
+            <div className="w-2/4 flex items-center space-x-4">
+              <input
+                type="file"
+                name="document_type"
+                onChange={handleChange}
+                className="flex-1 px-4 py-3 rounded-full bg-gray-200 hover:cursor-pointer"
+                accept=".pdf,.doc,.docx,.jpg,.png"
+              />
+              {formData.document_type && (
+                <button
+                  type="button"
+                  onClick={clearDoc}
+                  className="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
           <button
             type="submit"
             className="w-2/4 navbar text-white py-2 rounded-full font-semibold"
@@ -81,7 +227,7 @@ const SignUpPage = ({ onSwitch }) => {
           </button>
         </form>
       </div>
-      
+
       {/* Green section */}
       <div className="w-1/3 navbar text-white flex flex-col items-center justify-center p-6 text-center">
         <h2 className="text-2xl font-bold mb-2">Welcome Back!</h2>
@@ -94,15 +240,12 @@ const SignUpPage = ({ onSwitch }) => {
         >
           Log In
         </button>
-                <div className="py-5">
+        <div className="py-5">
           <a href="/">Back To Home...</a>
         </div>
       </div>
-
-
     </div>
   );
 };
-
 
 export default SignUpPage;

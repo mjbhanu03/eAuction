@@ -36,11 +36,13 @@ const LoginPage = ({ onSwitch }) => {
       })
       // console.log(formData)
     const data = await res.json(); 
+    
     if (res.ok && data.message === "Login successful") {
       navigate('/', { replace: true });
       login(data.user)
       // console.log(data)
     } else {
+      // console.log(data)
       alert('Login failed');
     }
 

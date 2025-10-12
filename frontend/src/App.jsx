@@ -67,7 +67,7 @@ function App() {
             <br /> <br />
             <div className="flex space-x-5" style={{color: '#056973'}}>
               <Button hrefLink="/auctions" btnName="Buy" colorName="purple" />
-              <Button hrefLink="#sell" btnName="Sell" colorName="purple" />
+              <Button hrefLink="/placebid" btnName="Sell" colorName="purple" />
             </div>
           </div>
 
