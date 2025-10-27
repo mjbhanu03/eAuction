@@ -10,6 +10,9 @@ body{
 .olive-dark{
   color:  #056973;
 }
+.bg-olive{
+    background-color:  #056973;
+}
 .btn-white, .btn-purple{
   transition:all ease 0.2s;
   display: inline-block;
@@ -18,6 +21,9 @@ body{
   transform: scale(1.01);
   box-shadow:0 0 10px rgba(255, 255, 255, 0.6);
   text-shadow:0 0 10px rgba(255, 255, 255, 0.6);
+}
+.btn-purple{
+  border-color: #056973;
 }
 .btn-purple:hover{
     transform: scale(1.01);

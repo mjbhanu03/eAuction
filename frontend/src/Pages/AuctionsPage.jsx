@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, Search, Filter, SortAsc, Gavel, Clock } from "lucide-react";
 import Header from "../Components/Header";
+import { Link } from "react-router-dom";
 
 export default function AuctionListing() {
   // const [menuOpen, setMenuOpen] = useState(false);
+  const [auctions, setAuctions] = useState([]);
 
-  const auctions = [
-    { id: 1, title: "Antique Vase", image: "https://www.cottageartsindia.com/cdn/shop/files/2148_1800x1800.jpg?v=1740224280", currentBid: "₹5,200", timeLeft: "2h 15m", bidders: 18 },
-    { id: 2, title: "Luxury Watch", image: "https://timeandtidewatches.com/wp-content/uploads/2023/11/Mathey-Tissot-Vintage-Custom-Elvis-Watch.jpg.webp", currentBid: "₹12,800", timeLeft: "5h 40m", bidders: 32 },
-    { id: 3, title: "Vintage Car Model", image: "https://i.pinimg.com/564x/04/7d/72/047d723662060b56ea821c905cd42189.jpg", currentBid: "₹22,000", timeLeft: "1h 05m", bidders: 12 },
-    { id: 4, title: "Rare Painting", image: "https://www.soosi.co.in/cdn/shop/products/IMG-20190415-WA0018_300x300.jpg?v=1571711114", currentBid: "₹40,000", timeLeft: "12h 30m", bidders: 21 },
-    { id: 5, title: "Diamond Ring", image: "https://images-cdn.ubuy.co.in/65264c5e66567725b96c7809-women-s-double-layer-micro-inlaid-zircon.jpg", currentBid: "₹75,000", timeLeft: "8h 20m", bidders: 14 },
-    { id: 6, title: "Classic Guitar", image: "https://www.bamboomusica.com/wp-content/uploads/2022/02/Portada_Guitarra-Clasica-Natural.png", currentBid: "₹15,600", timeLeft: "3h 50m", bidders: 9 },
-  ];
+  // const auctions = [];
+
+useEffect(()=>{
+  fetch("http://localhost:5000/bid/")
+  .then((res)=>res.json())
+  .then((data)=> {
+    setAuctions(data)
+    console.log(data)
+  })
+}, [])
 
   return (
     <div className="min-h-screen">
@@ -65,7 +69,8 @@ export default function AuctionListing() {
   {/* Image with subtle zoom */}
   <div className="overflow-hidden">
     <img
-      src={item.image}
+      src= 'https://motownindia.com/images/Features-and-Travel/AstaGuru-to-auction-prized-collection-of-classic-and-vintage-cars-Motown-India-Bureau-1-616.jpg'
+      // {item.image1_url}
       alt={item.title}
       className="w-full h-44 object-cover rounded-t-xl transition-transform duration-300 hover:scale-105"
     />
@@ -78,15 +83,32 @@ export default function AuctionListing() {
 
     <div className="flex justify-between items-center mt-1 text-sm text-gray-600">
       <span className="flex items-center gap-1">
-        <Clock size={14} /> {item.timeLeft}
+        <Clock size={14} /> 
+        {
+  (() => {
+    const now = new Date();
+    const end = new Date(item.start_date);
+    const diffMs = end - now;
+
+    if (diffMs <= 0) {
+      return "Active";
+    }
+
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${diffDays}d ${diffHours}h ${diffMinutes}m left to start this`;
+  })()
+}
       </span>
       <span className="font-bold olive-dark text-lg">{item.currentBid}</span>
     </div>
 
-    <p className="text-gray-500 text-xs mt-1">{item.bidders} bidders</p>
+    <p className="text-gray-500 text-xs mt-1">{item.status} bid</p>
 
 
-                <a href="/biddetails" className="bid-btn mt-auto w-full flex items-center justify-center gap-1"> Place Your Bid </a>
+                <Link to="/biddetails" state={{item}} className="bid-btn mt-auto w-full flex items-center justify-center gap-1"> Place Your Bid </Link>
 
   </div>
 </div>

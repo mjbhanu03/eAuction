@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Gavel, Clock, Users, DollarSign, ChevronLeft, ChevronRight, X, IndianRupee } from "lucide-react";
+import { Gavel, Clock, Users, ChevronLeft, ChevronRight, X, IndianRupee } from "lucide-react";
 import Header from "../Components/Header";
+import { useLocation } from "react-router-dom";
 
 export default function ProductDetail({ product }) {
   const [autoBid, setAutoBid] = useState({ maxBudget: "", minIncrement: "" });
@@ -19,23 +20,26 @@ export default function ProductDetail({ product }) {
   };
 
   // Mock product with multiple images
-  product = {
-    id: 1,
-    title: "Antique Vase",
-    images: [
-      "https://www.cottageartsindia.com/cdn/shop/files/3225_8ef29aa7-ee28-48b5-a61e-1839777a86cc_1800x1800.jpg?v=1730194377",
-      "https://www.cottageartsindia.com/cdn/shop/files/6794_767f9197-3a6e-445d-8705-c4afeafa7e7c.jpg?v=1755779867",
-      "https://www.cottageartsindia.com/cdn/shop/files/2148_1800x1800.jpg?v=1740224280",
-    ],
-    currentBid: "₹5,200",
-    timeLeft: "2h 15m",
-    bidders: 18,
-    history: [
-      { user: "Alice", bid: "₹5,200", time: "2 min ago" },
-      { user: "Bob", bid: "₹5,000", time: "10 min ago" },
-      { user: "Raj", bid: "₹4,800", time: "30 min ago" },
-    ],
-  };
+  // product = {
+  //   id: 1,
+  //   title: "Antique Vase",
+  //   images: [
+  //     "https://www.cottageartsindia.com/cdn/shop/files/3225_8ef29aa7-ee28-48b5-a61e-1839777a86cc_1800x1800.jpg?v=1730194377",
+  //     "https://www.cottageartsindia.com/cdn/shop/files/6794_767f9197-3a6e-445d-8705-c4afeafa7e7c.jpg?v=1755779867",
+  //     "https://www.cottageartsindia.com/cdn/shop/files/2148_1800x1800.jpg?v=1740224280",
+  //   ],
+  //   currentBid: "₹5,200",
+  //   timeLeft: "2h 15m",
+  //   bidders: 18,
+  //   history: [
+  //     { user: "Alice", bid: "₹5,200", time: "2 min ago" },
+  //     { user: "Bob", bid: "₹5,000", time: "10 min ago" },
+  //     { user: "Raj", bid: "₹4,800", time: "30 min ago" },
+  //   ],
+  // };
+  const location = useLocation()
+  const {item} = location.state 
+  product = item
 
   const nextImage = () => {
     setCurrentImage((prev) => (prev + 1) % product.images.length);
@@ -54,7 +58,7 @@ export default function ProductDetail({ product }) {
       <div className="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden mx-auto">
         <div className="grid md:grid-cols-2">
           {/* Carousel */}
-          <div className="relative bg-gray-100 flex items-center justify-center p-6">
+          {/* <div className="relative bg-gray-100 flex items-center justify-center p-6">
             <button
               onClick={prevImage}
               className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
@@ -73,7 +77,22 @@ export default function ProductDetail({ product }) {
             >
               <ChevronRight size={20} />
             </button>
-          </div>
+          </div> */}
+          {/* Static Image with Link */}
+<div className="relative bg-gray-100 flex items-center justify-center p-6">
+  <a
+    href="https://www.cottageartsindia.com/cdn/shop/files/3225_8ef29aa7-ee28-48b5-a61e-1839777a86cc_1800x1800.jpg?v=1730194377"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <img
+      src="https://www.cottageartsindia.com/cdn/shop/files/3225_8ef29aa7-ee28-48b5-a61e-1839777a86cc_1800x1800.jpg?v=1730194377"
+      alt="Static Product"
+      className="rounded-xl w-full h-[400px] object-cover shadow-md"
+    />
+  </a>
+</div>
+
 
           {/* Info Section */}
           <div className="p-8 flex flex-col">
@@ -86,11 +105,11 @@ export default function ProductDetail({ product }) {
             <div className="mt-6 flex flex-col gap-4">
               <div className="flex items-center gap-2 text-gray-600 text-sm">
                 <Clock size={18} className="olive-dark" />
-                <span>Time Left: {product.timeLeft}</span>
+                <span>Time Left: {product.start_date}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-600 text-sm">
                 <Users size={18} className="olive-dark" />
-                <span>{product.bidders} Bidders</span>
+                <span>{product.status} Bidders</span>
               </div>
               <div className="flex items-center gap-2 text-lg font-semibold olive-dark">
                 Current Bid: {product.currentBid}

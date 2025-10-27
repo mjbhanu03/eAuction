@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from "./Routes/authRoutes.js";
+import bidRoutes from "./Routes/bidRoutes.js"
 import cookieParser from "cookie-parser";
 import path from "path";
 
@@ -30,6 +31,9 @@ app.use('/photos/profile', express.static(path.join(__dirname, 'Photos')));
 
 // Use your auth routes
 app.use("/auth", authRoutes);
+
+// Bid Routes
+app.use("/bid", bidRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -11,6 +11,7 @@ import AuctionCard from "./Pages/AuctionsPage.jsx";
 import BidDetails from "./Pages/BidDetails.jsx";
 import About from "./Pages/AboutUs.jsx";
 import ContactUs from "./Pages/ContactUs.jsx";
+import SellForm from "./Pages/SellForm.jsx";
 import AdminApp from "./admin/AdminApp.jsx";
 
 
