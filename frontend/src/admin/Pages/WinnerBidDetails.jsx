@@ -1,8 +1,8 @@
-// src/admin/Pages/WinnerBidDetails.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Download, CheckCircle, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 export default function WinnerBidDetails() {
   const { id } = useParams();
@@ -11,64 +11,36 @@ export default function WinnerBidDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Simulate fetch; replace with real API call: /api/admin/winner-bids/:id
-    const timer = setTimeout(() => {
-      try {
-        // Mock dataset (in real use, fetch by id)
-        const mock = {
-          w1: {
-            _id: "w1",
-            itemName: "Antique Gold Coin",
-            itemDesc: "Handmade 18k gold coin from 1920s.",
-            itemId: "item-1001",
-            winnerName: "Rahul Sharma",
-            winnerEmail: "rahul@example.com",
-            winnerPhone: "+91-99999-00001",
-            winnerAddress: "Plot 12, MG Road, Ahmedabad, 380001",
-            winningAmount: 125000,
-            currency: "INR",
-            winDate: "2025-10-05T10:20:00.000Z",
-            invoiceUrl: "/invoices/w1.pdf",
-            images: ["https://via.placeholder.com/600x400"]
-          },
-          w2: {
-            _id: "w2",
-            itemName: "Vintage Car - Model X",
-            itemDesc: "Classic 1968 model restored; single owner.",
-            itemId: "item-2002",
-            winnerName: "Neha Verma",
-            winnerEmail: "neha@example.com",
-            winnerPhone: "+91-99999-00002",
-            winnerAddress: "Flat 5B, Park Street, Mumbai, 400001",
-            winningAmount: 850000,
-            currency: "INR",
-            winDate: "2025-09-28T15:45:00.000Z",
-            invoiceUrl: "/invoices/w2.pdf",
-            images: ["https://via.placeholder.com/600x400"]
-          }
-        };
+  const BASE_URL = `http://localhost:5000/admin/winner-bids/${id}`;
 
-        if (!mock[id]) throw new Error("Winner bid not found");
-        setData(mock[id]);
-        setError(null);
+  useEffect(() => {
+    const fetchWinnerDetails = async () => {
+      try {
+        const res = await axios.get(BASE_URL);
+        if (res.data.success) {
+          setData(res.data.data);
+        } else {
+          setError(res.data.message || "Winner not found");
+        }
       } catch (e) {
-        setError(e.message || "Failed to load details");
+        setError("Failed to fetch winner details");
       } finally {
         setLoading(false);
       }
-    }, 350);
-
-    return () => clearTimeout(timer);
+    };
+    fetchWinnerDetails();
   }, [id]);
 
   const handleMarkPaid = async () => {
-    // Example optimistic UI: in real app call your PATCH endpoint
     try {
-      // await fetch(`/api/admin/winner-bids/${id}/mark-paid`, { method: "POST" })
-      alert("Marked as paid (UI only).");
-    } catch (e) {
-      alert("Failed to mark paid.");
+      const res = await axios.post(`${BASE_URL}/mark-paid`);
+      if (res.data.success) {
+        alert("✅ Payment marked as completed!");
+      } else {
+        alert("❌ Failed to update payment status");
+      }
+    } catch {
+      alert("Error marking as paid");
     }
   };
 
@@ -77,23 +49,56 @@ export default function WinnerBidDetails() {
   if (!data) return null;
 
   return (
-    <motion.div className="max-w-4xl mx-auto p-6" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-      <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+    <motion.div
+      className="max-w-4xl mx-auto p-6"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg"
+      >
         <ArrowLeft size={16} /> Back
       </button>
 
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-3">
-            <img src={data.images?.[0]} alt={data.itemName} className="w-full h-64 object-cover rounded-lg" />
-            <h2 className="text-2xl font-semibold">{data.itemName}</h2>
+            <img
+              src={data.images?.[0] || `http://localhost:5000/photos/${data.image1_url}`}
+              alt={data.itemName}
+              className="w-full h-64 object-cover rounded-lg"
+            />
+            <div className="flex gap-2 mt-2">
+              {data.images?.slice(1).map((img, i) => (
+                <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={img}
+                    alt={`Extra ${i + 2}`}
+                    className="w-16 h-16 object-cover rounded-md border hover:opacity-80 transition"
+                  />
+                </a>
+              ))}
+            </div>
+
+            <h2 className="text-2xl font-semibold mt-3">{data.itemName}</h2>
             <p className="text-gray-700">{data.itemDesc}</p>
 
             <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
-              <div><b>Item ID:</b> {data.itemId}</div>
+              <div><b>Item ID:</b> {data.id}</div>
               <div><b>Win Date:</b> {new Date(data.winDate).toLocaleString()}</div>
-              <div><b>Winning Amount:</b> ₹{data.winningAmount.toLocaleString()} {data.currency}</div>
-              <div><b>Invoice:</b> <a href={data.invoiceUrl} target="_blank" rel="noreferrer" className="underline text-blue-600">Download</a></div>
+              <div><b>Winning Amount:</b> ₹{data.winningAmount?.toLocaleString()}</div>
+              <div>
+                <b>Invoice:</b>{" "}
+                <a
+                  href={data.invoiceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-blue-600"
+                >
+                  Download
+                </a>
+              </div>
             </div>
           </div>
 
@@ -103,14 +108,21 @@ export default function WinnerBidDetails() {
               <div className="font-medium">{data.winnerName}</div>
               <div className="text-sm text-gray-600">{data.winnerEmail}</div>
               <div className="text-sm text-gray-600">{data.winnerPhone}</div>
-              <div className="text-sm text-gray-600 mt-2">{data.winnerAddress}</div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <button onClick={handleMarkPaid} className="flex items-center gap-2 justify-center px-4 py-2 bg-green-600 text-white rounded-xl">
+              <button
+                onClick={handleMarkPaid}
+                className="flex items-center gap-2 justify-center px-4 py-2 bg-green-600 text-white rounded-xl"
+              >
                 <CheckCircle size={16} /> Mark Paid
               </button>
-              <a href={data.invoiceUrl} className="flex items-center gap-2 justify-center px-4 py-2 border rounded-xl" target="_blank" rel="noreferrer">
+              <a
+                href={data.invoiceUrl}
+                className="flex items-center gap-2 justify-center px-4 py-2 border rounded-xl"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <FileText size={16} /> View/Download Invoice
               </a>
             </div>

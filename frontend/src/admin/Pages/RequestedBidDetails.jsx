@@ -93,7 +93,7 @@ export default function RequestedBidDetails() {
             onClick={handleReject}
             className="flex-1 bg-red-600 text-white py-2 rounded-xl"
           >
-            ❌ Reject
+            ❌ Reject`  `
           </button>
         </div>
       </div>

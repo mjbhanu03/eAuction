@@ -1,30 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 export default function Payments() {
-  // Dummy data: items with users who paid entry fee
-  const [items] = useState([
-    {
-      id: 1,
-      name: "Luxury Car Auction",
-      users: [
-        { id: "u1", name: "Amit Sharma", email: "amit@example.com", amount: 500 },
-        { id: "u2", name: "Rahul Mehta", email: "rahul@example.com", amount: 500 },
-      ],
-    },
-    {
-      id: 2,
-      name: "Villa Property Auction",
-      users: [
-        { id: "u3", name: "Sneha Desai", email: "sneha@example.com", amount: 500 },
-        { id: "u4", name: "Arjun Patel", email: "arjun@example.com", amount: 500 },
-        { id: "u5", name: "Pooja Nair", email: "pooja@example.com", amount: 500 },
-      ],
-    },
-  ]);
-
+  const [items, setItems] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/admin/entry-payments");
+        const data = await res.json();
+        if (data.success) {
+          setItems(data.data);
+          setFiltered(data.data);
+        } else {
+          setError("No payments found");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        setError("Failed to fetch payments");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayments();
+  }, []);
+
+  // 🔍 Filter bids based on search input
+  useEffect(() => {
+    if (search.trim() === "") {
+      setFiltered(items);
+    } else {
+      const filteredItems = items.filter((item) =>
+        item.bidName.toLowerCase().includes(search.toLowerCase())
+      );
+      setFiltered(filteredItems);
+    }
+  }, [search, items]);
+
+  if (loading) return <div className="p-6">Loading payments...</div>;
+  if (error) return <div className="p-6 text-red-500">{error}</div>;
 
   return (
     <motion.div
@@ -32,18 +52,29 @@ export default function Payments() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <h1 className="text-3xl font-bold mb-6 text-blue-800">💰 Entry Payments by Item</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-blue-800">💰 Entry Payments by Item</h1>
 
-      {items.length > 0 ? (
+        {/* 🔍 Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by Bid Name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-4 py-2 rounded-lg shadow-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+
+      {filtered.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
+          {filtered.map((item) => (
             <motion.div
-              key={item.id}
+              key={item.bidId}
               whileHover={{ scale: 1.05 }}
-              onClick={() => navigate(`/admin/payments/${item.id}`)}
+              onClick={() => navigate(`/admin/payments/${item.bidId}`)}
               className="p-6 bg-white rounded-2xl shadow-lg border cursor-pointer"
             >
-              <h2 className="font-bold text-gray-800">{item.name}</h2>
+              <h2 className="font-bold text-gray-800">{item.bidName}</h2>
               <p className="text-sm mt-2">
                 Users Paid:{" "}
                 <b className="text-blue-700">{item.users.length}</b>

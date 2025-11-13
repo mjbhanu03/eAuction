@@ -1,218 +1,210 @@
-// src/admin/Pages/BidsHistoryDetails.jsx
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Download, Search as SearchIcon } from "lucide-react";
-import { motion } from "framer-motion";
-
-/**
- * Replace mocked fetch with real:
- * GET /api/admin/bids-history/:itemId
- * returns { item: {...}, bids: [ ... chronological ... ] }
- */
-
-function toCSV(rows, item) {
-  const header = ["bidId", "userId", "userName", "userEmail", "amount", "timestamp"];
-  const lines = [header.join(",")].concat(
-    rows.map((r) =>
-      [
-        `"${r.bidId}"`,
-        `"${r.userId}"`,
-        `"${r.userName}"`,
-        `"${r.userEmail}"`,
-        r.amount,
-        `"${new Date(r.timestamp).toISOString()}"`,
-      ].join(",")
-    )
-  );
-  return "Item: " + (item?.itemName || "") + "\n\n" + lines.join("\n");
-}
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, FileDown, Crown } from "lucide-react";
 
 export default function BidsHistoryDetails() {
   const { itemId } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [item, setItem] = useState(null);
   const [bids, setBids] = useState([]);
-  const [q, setQ] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // ✅ Fetch winner + bid logs
   useEffect(() => {
-    // Mock fetch -> replace with real fetch(`/api/admin/bids-history/${itemId}`)
-    const timer = setTimeout(() => {
+    const fetchDetails = async () => {
       try {
-        const mockItem = {
-          itemId,
-          itemName: itemId === "item-1001" ? "Antique Gold Coin" : "Sample Item",
-          thumbnail: "https://via.placeholder.com/600x300",
-          description: "Detailed description of the item and sale.",
-          startAt: "2025-10-01T09:00:00.000Z",
-          endAt: "2025-10-05T10:20:00.000Z",
-          finalPrice: 125000,
-          currency: "INR",
-          winnerId: "u4",
-          winnerName: "Rahul Sharma",
-        };
+        const res1 = await fetch(`http://localhost:5000/admin/bid-history/${itemId}`);
+        const winnerData = await res1.json();
 
-        // chronological older->newer
-        const mockBids = [
-          { bidId: "b1", userId: "u1", userName: "Amit", userEmail: "amit@example.com", amount: 100000, timestamp: "2025-10-01T09:10:00.000Z" },
-          { bidId: "b2", userId: "u2", userName: "Rohit", userEmail: "rohit@example.com", amount: 105000, timestamp: "2025-10-02T11:15:00.000Z" },
-          { bidId: "b3", userId: "u3", userName: "Priya", userEmail: "priya@example.com", amount: 110000, timestamp: "2025-10-03T13:00:00.000Z" },
-          { bidId: "b4", userId: "u1", userName: "Amit", userEmail: "amit@example.com", amount: 120000, timestamp: "2025-10-04T09:40:00.000Z" },
-          { bidId: "b5", userId: "u4", userName: "Rahul", userEmail: "rahul@example.com", amount: 125000, timestamp: "2025-10-05T10:20:00.000Z" }, // winner
-        ];
+        const res2 = await fetch(`http://localhost:5000/admin/bid-history/${itemId}/logs`);
+        const logsData = await res2.json();
 
-        setItem(mockItem);
-        setBids(mockBids);
-        setError(null);
-      } catch (e) {
-        setError("Failed to load bid history.");
+        if (winnerData.success) setItem(winnerData.data);
+        if (logsData.success) setBids(logsData.data);
+      } catch (error) {
+        console.error("Error fetching bid details:", error);
+        setError("Failed to fetch bid details");
       } finally {
         setLoading(false);
       }
-    }, 300);
+    };
 
-    return () => clearTimeout(timer);
+    fetchDetails();
   }, [itemId]);
 
-  const filtered = useMemo(() => {
-    let rows = bids.slice();
-    if (q.trim()) {
-      const s = q.toLowerCase();
-      rows = rows.filter(
-        (r) =>
-          (r.userName && r.userName.toLowerCase().includes(s)) ||
-          (r.userEmail && r.userEmail.toLowerCase().includes(s)) ||
-          (r.userId && r.userId.toLowerCase().includes(s))
-      );
-    }
-    if (fromDate) {
-      const from = new Date(fromDate);
-      rows = rows.filter((r) => new Date(r.timestamp) >= from);
-    }
-    if (toDate) {
-      const to = new Date(toDate);
-      to.setHours(23, 59, 59, 999);
-      rows = rows.filter((r) => new Date(r.timestamp) <= to);
-    }
-    // chronological
-    rows.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    return rows;
-  }, [bids, q, fromDate, toDate]);
-
-  const stats = useMemo(() => {
-    if (!bids || bids.length === 0) return null;
-    const totalBids = bids.length;
-    const uniqueBidders = new Set(bids.map((b) => b.userId)).size;
-    const highest = Math.max(...bids.map((b) => b.amount));
-    const lowest = Math.min(...bids.map((b) => b.amount));
-    return { totalBids, uniqueBidders, highest, lowest };
-  }, [bids]);
-
-  const handleExportCSV = () => {
-    const csv = toCSV(filtered, item);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  // ✅ CSV Export Function
+  const exportCSV = () => {
+    const csvRows = [
+      ["Name", "Email", "Bid Amount", "Date"],
+      ...bids.map((b) => [
+        `${b.user?.name || ""} ${b.user?.surname || ""}`.trim(),
+        b.user?.email || "",
+        b.price || "",
+        new Date(b.createdAt).toLocaleString(),
+      ]),
+    ];
+    const csvData = csvRows.map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csvData], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${item?.itemId || "bids"}-history.csv`;
+    a.download = `${item?.bid?.title || "bids"}_history.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  if (loading) return <div className="p-6 text-gray-500">Loading bid history...</div>;
-  if (error) return <div className="p-6 text-red-600">{error}</div>;
-  if (!item) return null;
+  // ✅ Summary calculations
+  const summary = {
+    totalParticipants: new Set(bids.map((b) => b.user?.id)).size,
+    totalBids: bids.length,
+    highestBid: bids.length ? Math.max(...bids.map((b) => b.price || 0)) : 0,
+    lowestBid: bids.length ? Math.min(...bids.map((b) => b.price || 0)) : 0,
+  };
+
+  // ✅ Loading / Error / Empty states
+  if (loading)
+    return <div className="p-6 bg-white rounded-xl shadow text-gray-500">Loading bid details...</div>;
+  if (error)
+    return <div className="p-6 bg-red-50 border border-red-200 text-red-700 rounded-xl">{error}</div>;
+  if (!item)
+    return <div className="p-6 bg-white rounded-xl shadow text-gray-600">No bid details found.</div>;
+
+  // ✅ Winner ID for highlight
+  const winnerId = item?.user?.id;
 
   return (
-    <motion.div className="max-w-6xl mx-auto p-6" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-      <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
-        <ArrowLeft size={16} /> Back to History
-      </button>
+    <div className="p-6 space-y-6">
+      {/* 🔙 Back + Export */}
+      <div className="flex items-center justify-between">
+        <Link to="/admin/bids-history" className="flex items-center gap-2 text-[#0b3d91] hover:underline">
+          <ArrowLeft size={18} /> Back to History
+        </Link>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <div className="flex flex-col md:flex-row md:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <img src={item.thumbnail} alt={item.itemName} className="w-44 h-28 object-cover rounded-md border" />
-            <div>
-              <h2 className="text-2xl font-semibold">{item.itemName}</h2>
-              <div className="text-sm text-gray-600">{item.description}</div>
-              <div className="mt-2 text-sm text-gray-600">Start: {new Date(item.startAt).toLocaleString()}</div>
-              <div className="text-sm text-gray-600">End: {new Date(item.endAt).toLocaleString()}</div>
-            </div>
-          </div>
+        <button
+          onClick={exportCSV}
+          className="flex items-center gap-2 px-4 py-2 bg-[#0b3d91] text-white rounded-lg shadow"
+        >
+          <FileDown size={16} /> Export CSV
+        </button>
+      </div>
 
-          <div className="text-sm text-gray-600 text-right">
-            <div>Final Price: <span className="font-semibold">₹{item.finalPrice?.toLocaleString()}</span></div>
-            <div>Winner: <span className="font-medium">{item.winnerName}</span></div>
-            <div>Total bids: <span className="font-semibold">{stats?.totalBids ?? 0}</span></div>
-            <div>Participants: <span className="font-semibold">{stats?.uniqueBidders ?? 0}</span></div>
-          </div>
+      {/* 🧾 Quick Summary */}
+      <div className="bg-white rounded-xl shadow p-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+        <div>
+          <p className="text-gray-500 text-sm">Total Participants</p>
+          <p className="text-lg font-semibold">{summary.totalParticipants}</p>
         </div>
+        <div>
+          <p className="text-gray-500 text-sm">Total Bids</p>
+          <p className="text-lg font-semibold">{summary.totalBids}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-sm">Highest Bid</p>
+          <p className="text-lg font-semibold text-green-600">
+            ₹{summary.highestBid.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-sm">Lowest Bid</p>
+          <p className="text-lg font-semibold text-red-600">
+            ₹{summary.lowestBid.toLocaleString()}
+          </p>
+        </div>
+      </div>
 
-        {/* Filters and export */}
-        <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-white rounded-lg px-3 py-2 shadow">
-              <SearchIcon size={16} className="text-gray-400" />
-              <input placeholder="Search bidder name or email..." value={q} onChange={(e) => setQ(e.target.value)} className="ml-2 outline-none text-sm" />
-            </div>
+      {/* 🏆 Winner & Item Info */}
+      <div className="bg-white rounded-xl shadow p-6 flex gap-6">
+        <img
+          src={
+            item?.bid?.image1_url
+              ? `http://localhost:5000/photos/${item.bid.image1_url}`
+              : "https://via.placeholder.com/200"
+          }
+          alt={item?.bid?.title}
+          className="w-48 h-36 object-cover rounded-lg border"
+        />
 
-            <div className="flex items-center gap-2 text-sm">
-              <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="px-2 py-1 border rounded" />
-              <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="px-2 py-1 border rounded" />
-            </div>
+        <div className="flex-1">
+          <h1 className="text-2xl font-semibold text-gray-800">{item?.bid?.title}</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {item?.bid?.description || "No description available."}
+          </p>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+            <div><strong>Status:</strong> {item?.bid?.status || "N/A"}</div>
+            <div><strong>Base Price:</strong> ₹{item?.bid?.price?.toLocaleString() || "0"}</div>
+            <div><strong>Start:</strong> {item?.bid?.start_date ? new Date(item.bid.start_date).toLocaleString() : "N/A"}</div>
+            <div><strong>End:</strong> {item?.bid?.end_date ? new Date(item.bid.end_date).toLocaleString() : "N/A"}</div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 py-2 border rounded-lg">
-              <Download size={16} /> Export CSV
-            </button>
-          </div>
-        </div>
-
-        {/* Bids list */}
-        <div className="mt-6">
-          {filtered.length === 0 ? (
-            <div className="p-6 text-gray-600">No bids found for selected filters.</div>
-          ) : (
-            <div className="space-y-2">
-              {filtered.map((b) => (
-                <div key={b.bidId} className={`flex items-center justify-between p-3 border rounded-lg ${b.userId === item.winnerId && b.amount === item.finalPrice ? "bg-green-50" : ""}`}>
-                  <div>
-                    <div className="text-sm text-gray-600">{new Date(b.timestamp).toLocaleString()}</div>
-                    <div className="text-base font-medium">{b.userName} <span className="text-sm text-gray-500">({b.userEmail})</span></div>
-                    <div className="text-xs text-gray-400">UID: {b.userId} • Bid ID: {b.bidId}</div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-lg font-semibold">₹{b.amount.toLocaleString()}</div>
-                    {b.note && <div className="text-xs text-gray-500">{b.note}</div>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Participants snapshot */}
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Participants</h3>
-          <div className="flex flex-wrap gap-3">
-            {[...new Set(bids.map((b) => b.userId))].map((uid) => {
-              const representative = bids.find((x) => x.userId === uid);
-              return (
-                <div key={uid} className="px-3 py-2 bg-gray-50 border rounded-lg text-sm">
-                  <div className="font-medium">{representative.userName}</div>
-                  <div className="text-xs text-gray-500">{representative.userEmail}</div>
-                </div>
-              );
-            })}
+          {/* Winner Info */}
+          <div className="mt-4 border-t pt-3">
+            <h2 className="text-lg font-semibold text-[#0b3d91] flex items-center gap-1">
+              <Crown size={18} className="text-yellow-500" /> Winner
+            </h2>
+            <p className="text-sm text-gray-700 mt-1">
+              {item?.user ? `${item.user.name} ${item.user.surname || ""}` : "No winner"}
+            </p>
+            <p className="text-sm text-gray-500">{item?.user?.email}</p>
+            <p className="text-sm text-gray-500">{item?.user?.number}</p>
+            <p className="text-sm mt-1">
+              Final Amount:{" "}
+              <strong className="text-green-600">
+                ₹{item?.transaction?.amount ? item.transaction.amount.toLocaleString() : "0"}
+              </strong>
+            </p>
           </div>
         </div>
       </div>
-    </motion.div>
+
+      {/* 📜 Bid Logs Table */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">All Bids Placed</h2>
+
+        {bids.length === 0 ? (
+          <p className="text-gray-500 text-sm">No bid logs found.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm border border-gray-200 rounded-lg">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="px-4 py-2 text-left">Bidder Name</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-left">Bid Amount</th>
+                  <th className="px-4 py-2 text-left">Placed At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bids.map((b, i) => {
+                  const isWinner = b.user?.id === winnerId && b.price === item?.transaction?.amount;
+                  return (
+                    <tr
+                      key={i}
+                      className={`border-t transition-all ${
+                        isWinner
+                          ? "bg-yellow-50 border-yellow-300 font-semibold"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      <td className="px-4 py-2 flex items-center gap-2">
+                        {isWinner && <Crown size={14} className="text-yellow-500" />}
+                        {b.user ? `${b.user.name} ${b.user.surname || ""}` : "Unknown"}
+                      </td>
+                      <td className="px-4 py-2">{b.user?.email || "-"}</td>
+                      <td className="px-4 py-2 text-green-600 font-semibold">
+                        ₹{b.price ? b.price.toLocaleString() : "0"}
+                      </td>
+                      <td className="px-4 py-2 text-gray-500">
+                        {b.createdAt ? new Date(b.createdAt).toLocaleString() : "-"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

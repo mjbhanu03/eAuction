@@ -5,6 +5,7 @@ import authRoutes from "./Routes/authRoutes.js";
 import bidRoutes from "./Routes/bidRoutes.js"
 import cookieParser from "cookie-parser";
 import path from "path";
+import adminRoutes from "./Admin/Routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -29,11 +30,15 @@ const __dirname = path.resolve();
 // Serve static profile images from the backend's Photos/Profile folder
 app.use('/photos/profile', express.static(path.join(__dirname, 'Photos')));
 
+app.use("/photos", express.static(path.join(__dirname, "Photos")));
+
 // Use your auth routes
 app.use("/auth", authRoutes);
 
 // Bid Routes
 app.use("/bid", bidRoutes)
+
+app.use("/admin", adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

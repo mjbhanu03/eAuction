@@ -1,5 +1,5 @@
-// src/admin/Pages/WinnerBids.jsx
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { Trophy, Eye, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -9,47 +9,22 @@ export default function WinnerBids() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Replace with your real API endpoint. For now we mock a delayed response.
-    const timer = setTimeout(() => {
+    const fetchWinners = async () => {
       try {
-        // Mock data — replace /api/admin/winner-bids with your backend
-        const data = [
-          {
-            _id: "w1",
-            itemName: "Antique Gold Coin",
-            winnerName: "Rahul Sharma",
-            winnerEmail: "rahul@example.com",
-            winnerPhone: "+91-99999-00001",
-            winnerAddress: "Plot 12, MG Road, Ahmedabad, 380001",
-            winningAmount: 125000,
-            currency: "INR",
-            imageUrl: "https://via.placeholder.com/160",
-            winDate: "2025-10-05T10:20:00.000Z",
-            invoiceUrl: "/invoices/w1.pdf"
-          },
-          {
-            _id: "w2",
-            itemName: "Vintage Car - Model X",
-            winnerName: "Neha Verma",
-            winnerEmail: "neha@example.com",
-            winnerPhone: "+91-99999-00002",
-            winnerAddress: "Flat 5B, Park Street, Mumbai, 400001",
-            winningAmount: 850000,
-            currency: "INR",
-            imageUrl: "https://via.placeholder.com/160",
-            winDate: "2025-09-28T15:45:00.000Z",
-            invoiceUrl: "/invoices/w2.pdf"
-          }
-        ];
-        setWinnerBids(data);
-        setError(null);
-      } catch (e) {
+        const res = await axios.get("http://localhost:5000/admin/winner-bids");
+        if (res.data.success) {
+          setWinnerBids(res.data.data);
+        } else {
+          setError("No winner data found.");
+        }
+      } catch (err) {
+        console.error("Error fetching winner bids:", err);
         setError("Failed to load winner bids.");
       } finally {
         setLoading(false);
       }
-    }, 500); // simulate network
-    return () => clearTimeout(timer);
+    };
+    fetchWinners();
   }, []);
 
   return (
@@ -62,7 +37,9 @@ export default function WinnerBids() {
       </div>
 
       {loading && (
-        <div className="bg-white rounded-xl p-6 shadow text-gray-500">Loading winner bids...</div>
+        <div className="bg-white rounded-xl p-6 shadow text-gray-500">
+          Loading winner bids...
+        </div>
       )}
 
       {error && (
@@ -74,24 +51,81 @@ export default function WinnerBids() {
       {!loading && !error && (
         <>
           {winnerBids.length === 0 ? (
-            <div className="bg-white rounded-xl p-6 shadow text-gray-600">No winner bids found.</div>
+            <div className="bg-white rounded-xl p-6 shadow text-gray-600">
+              No winner bids found.
+            </div>
           ) : (
             <div className="grid gap-6">
               {winnerBids.map((wb) => (
-                <div key={wb._id} className="bg-white shadow-lg rounded-xl p-4 flex gap-6 items-center hover:shadow-xl transition">
-                  <img
-                    src={wb.imageUrl}
-                    alt={wb.itemName}
-                    className="w-36 h-28 object-cover rounded-lg border"
-                  />
+                <div
+                  key={wb._id}
+                  className="bg-white shadow-lg rounded-xl p-4 flex gap-6 items-center hover:shadow-xl transition"
+                >
+                  {/* 🖼️ Image Section */}
+                  <div className="flex flex-col items-center">
+                    {/* Main Image Clickable */}
+                    <a
+                      href={wb.images?.[0] || "https://via.placeholder.com/160"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={wb.images?.[0] || "https://via.placeholder.com/160"}
+                        alt={wb.itemName}
+                        className="w-36 h-28 object-cover rounded-lg border mb-2 cursor-pointer hover:opacity-80 transition"
+                      />
+                    </a>
 
+                    {/* Thumbnails */}
+                    <div className="flex gap-1">
+                      {wb.images?.slice(1).map((img, i) => (
+                        <a
+                          key={i}
+                          href={img}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={img}
+                            alt={`Image ${i + 2}`}
+                            className="w-10 h-10 object-cover rounded-md border cursor-pointer hover:opacity-80 transition"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 🏆 Winner Info */}
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-800">{wb.itemName}</h2>
-                        <p className="text-sm text-gray-600">Winner: <span className="font-medium">{wb.winnerName}</span></p>
-                        <p className="text-sm text-gray-600">Amount: <span className="font-semibold">₹{wb.winningAmount.toLocaleString()}</span></p>
-                        <p className="text-sm text-gray-500 mt-1">Won on: <span>{new Date(wb.winDate).toLocaleString()}</span></p>
+                        <h2 className="text-lg font-semibold text-gray-800">
+                          {wb.itemName}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          Winner:{" "}
+                          <span className="font-medium">{wb.winnerName}</span>
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Amount:{" "}
+                          <span className="font-semibold">
+                            ₹{wb.winningAmount?.toLocaleString()}
+                          </span>
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Won on:{" "}
+                          <span>
+                            {wb.endDate
+                              ? new Date(wb.endDate).toLocaleString("en-GB", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "N/A"}
+                          </span>
+                        </p>
                       </div>
 
                       <div className="text-right text-sm text-gray-500">
@@ -101,15 +135,22 @@ export default function WinnerBids() {
                     </div>
                   </div>
 
+                  {/* 📄 Actions */}
                   <div className="flex flex-col items-end gap-2">
-                    <Link
-                      to={`/admin/winner-bids/${wb._id}`}
-                      className="flex items-center gap-2 px-3 py-2 bg-[#0b3d91] text-white rounded-lg"
+                  <Link
+                    to={`/admin/winner-bids/${wb.id}`}   // ✅ Change from wb._id to wb.id
+                    className="flex items-center gap-2 px-3 py-2 bg-[#0b3d91] text-white rounded-lg hover:bg-[#092f73] transition"
                     >
-                      <Eye size={16} /> View
+                    <Eye size={16} /> View
                     </Link>
 
-                    <a href={wb.invoiceUrl} className="flex items-center gap-2 px-3 py-2 border rounded-lg" target="_blank" rel="noreferrer">
+
+                    <a
+                      href={wb.invoiceUrl}
+                      className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-100 transition"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       <Download size={16} /> Invoice
                     </a>
                   </div>
