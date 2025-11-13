@@ -69,7 +69,7 @@ useEffect(()=>{
   {/* Image with subtle zoom */}
   <div className="overflow-hidden">
     <img
-      src= 'https://motownindia.com/images/Features-and-Travel/AstaGuru-to-auction-prized-collection-of-classic-and-vintage-cars-Motown-India-Bureau-1-616.jpg'
+      src= {`http://localhost:5000/photos/bidsphotos/${item.image1_url}`}
       // {item.image1_url}
       alt={item.title}
       className="w-full h-44 object-cover rounded-t-xl transition-transform duration-300 hover:scale-105"

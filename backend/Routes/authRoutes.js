@@ -32,9 +32,11 @@ router.post("/register", upload.single("document_type"), async (req, res) => {
 
     return res.status(201).json({ message: "User created successfully!" });
   } catch (error) {
-  console.error("Backend Error:", error.stack || error.message || error);
-  return res.status(500).json({ message: "Server error", error: error.message });
-}
+    console.error("Backend Error:", error.stack || error.message || error);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
 });
 
 // LOGIN USER
@@ -96,7 +98,9 @@ router.get("/profile/:email", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     // Fetch cities and hierarchical data
@@ -105,14 +109,16 @@ router.get("/profile/:email", async (req, res) => {
     // Map the result to a user profile with city details
     const userProfile = {
       ...user.dataValues,
-      city_id: citiesWithHierarchy || {}
+      city_id: citiesWithHierarchy || {},
     };
 
     // Send the response
     res.json({ success: true, user: userProfile });
   } catch (error) {
     console.error("Profile error:", error);
-    res.status(500).json({ success: false, message: "Failed to load profile." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to load profile." });
   }
 });
 
@@ -136,7 +142,7 @@ router.get("/cities", async (req, res) => {
     res.json(cities);
   } catch (error) {
     // res.status(404).json({ message: "Internal Server Error" });
-    console.log(error)
+    console.log(error);
   }
 });
 

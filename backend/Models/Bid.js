@@ -50,6 +50,13 @@ const Bid = db.define("bids", {
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  docs:{
+    type: DataTypes.STRING,
+    allowNull: false
+  }
+}, {
+  timestamps: false, 
+  tableName: "bids"
 })
 
 export default Bid
