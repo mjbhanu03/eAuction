@@ -13,6 +13,7 @@ router.get("/", async (req, res) => {
   try {
     const data = await Bid.findAll({
       attributes: { exclude: ["createdAt", "updatedAt"] },
+      where: {status: 'Active'}
     });
     return res.status(200).json(data);
   } catch (error) {

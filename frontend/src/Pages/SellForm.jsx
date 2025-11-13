@@ -15,6 +15,25 @@ const BidForm = () => {
     images: [],
   });
 
+  const formatDate = (date) =>{
+    return date.toISOString().split("T")[0];
+  }
+
+  // Minimum start date
+  const getMinStartDate = () => {
+    const today = new Date();
+    today.setDate(today.getDate() + 5);
+    return formatDate(today)
+  }
+
+  // Maximum end date
+  const getMaxEndDate = (startDate) => {
+    if(!startDate) return "";
+    const date = new Date(startDate)
+    date.setDate(date.getDate() + 7)
+    return formatDate(date) 
+  }
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "images") {
@@ -134,6 +153,7 @@ const BidForm = () => {
                 name="start_date"
                 value={formData.start_date}
                 onChange={handleChange}
+                min={getMinStartDate()}
                 required
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -147,6 +167,8 @@ const BidForm = () => {
                 name="end_date"
                 value={formData.end_date}
                 onChange={handleChange}
+                min={formData.start_date}
+                max={getMaxEndDate(formData.start_date)}
                 required
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -174,7 +196,6 @@ const BidForm = () => {
               <option value="6">Furniture</option>
               <option value="7">Collectibles</option>
               <option value="8">Real State</option>
-              {/* Add dynamic categories here */}
             </select>
           </div>
 
@@ -203,7 +224,6 @@ const BidForm = () => {
                 <input
                   type="file"
                   name="imageTwo"
-                  // accept="image/*"
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
                 />
               </div>
@@ -225,7 +245,6 @@ const BidForm = () => {
                 <input
                   type="file"
                   name="imageFour"
-                  // accept="image/*"
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
                 />
               </div>
