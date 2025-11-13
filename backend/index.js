@@ -28,6 +28,7 @@ const __dirname = path.resolve();
 
 // Serve static profile images from the backend's Photos/Profile folder
 app.use('/photos/profile', express.static(path.join(__dirname, 'Photos')));
+app.use('/photos/bidsphotos', express.static(path.join(__dirname, 'Photos/Bids')));
 
 // Use your auth routes
 app.use("/auth", authRoutes);
