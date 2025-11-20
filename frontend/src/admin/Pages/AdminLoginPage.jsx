@@ -19,7 +19,7 @@ const AdminLoginPage = () => {
     }));
   };
 
-  // ✅ Handle submit and connect to backend
+  // Login function
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -35,9 +35,8 @@ const AdminLoginPage = () => {
       setLoading(false);
 
       if (response.ok) {
-        // Save token in local storage
         localStorage.setItem("adminToken", data.token);
-        localStorage.setItem("adminId", data.admin.id); // ✅ Add this line
+        localStorage.setItem("adminId", data.admin.id);
         localStorage.setItem("adminRole", data.admin.role);
         localStorage.setItem("adminName", data.admin.name);
 
@@ -55,23 +54,31 @@ const AdminLoginPage = () => {
 
   return (
     <div className="h-screen flex">
-      {/* Green Section */}
-      <div className="w-1/3 bg-green-800 text-white flex flex-col items-center justify-center p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">Admin Panel Access</h2>
-        <p className="mb-6 text-sm">
-          Authorized personnel only. Please log in to continue.
-        </p>
+      
+      {/* Left Gradient Section (updated colors) */}
+      <div className="w-1/3 bg-gradient-to-b from-[#007b8f] to-[#00c4d6] text-white flex flex-col items-center justify-center p-6 text-center shadow-xl">
+
+        <h2 className="text-3xl font-bold mb-4">New Here?</h2>
+        <p className="mb-8 text-lg">Create your account and join us today!</p>
+
+        <button
+          onClick={() => navigate("/signup")}
+          className="border border-white px-8 py-2 rounded-full text-lg hover:bg-white hover:text-[#008ca3] transition"
+        >
+          Sign Up
+        </button>
+
         <button
           onClick={() => navigate("/")}
-          className="border border-white px-6 py-2 rounded-full hover:bg-white hover:text-green-800 transition"
+          className="mt-6 underline text-white hover:text-gray-200"
         >
-          Back to Home
+          Back To Home...
         </button>
       </div>
 
       {/* Login Form Section */}
       <div className="w-2/3 p-10 flex flex-col justify-center">
-        <h2 className="text-3xl font-semibold text-center text-green-900 mb-6">
+        <h2 className="text-4xl font-semibold text-center text-[#007b8f] mb-10">
           Admin Login
         </h2>
 
@@ -85,7 +92,7 @@ const AdminLoginPage = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+            className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none text-lg"
             required
           />
 
@@ -95,14 +102,14 @@ const AdminLoginPage = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none"
+            className="w-2/4 px-4 py-3 rounded-full bg-gray-200 focus:outline-none text-lg"
             required
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-2/4 bg-green-800 text-white py-2 rounded-full font-semibold hover:bg-green-700 transition"
+            className="w-2/4 bg-[#008ca3] text-white py-3 rounded-full text-lg font-semibold hover:bg-[#007b8f] transition"
           >
             {loading ? "Logging in..." : "Log In"}
           </button>

@@ -157,3 +157,22 @@ export const getAdminById = async (req, res) => {
 };
 
 
+// ✅ Delete Admin
+export const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await AdminUser.findByPk(id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    await admin.destroy();
+
+    return res.status(200).json({ message: "Admin deleted successfully" });
+
+  } catch (error) {
+    console.error("❌ Error deleting admin:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

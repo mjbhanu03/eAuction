@@ -1,4 +1,3 @@
-// src/admin/Pages/AdminManagement.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -7,21 +6,38 @@ export default function AdminManagement() {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch admins from backend
+  // 🔹 Fetch Admins
+  const fetchAdmins = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/admin/get-all-admins");
+      setAdmins(response.data);
+    } catch (error) {
+      console.error("❌ Error fetching admin data:", error);
+      alert("Failed to load admin data!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/admin/get-all-admins");
-        setAdmins(response.data);
-      } catch (error) {
-        console.error("❌ Error fetching admin data:", error);
-        alert("Failed to load admin data!");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchAdmins();
   }, []);
+
+  // 🔥 Delete Admin
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this admin?");
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`http://localhost:5000/admin/delete-admin/${id}`);
+
+      alert("Admin deleted successfully!");
+      fetchAdmins(); // Refresh list
+    } catch (error) {
+      console.error("❌ Error deleting admin:", error);
+      alert("Failed to delete admin!");
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg">
@@ -53,13 +69,22 @@ export default function AdminManagement() {
                   </span>
                 </td>
                 <td className="p-3">{admin.email}</td>
-                <td className="p-3 text-center">
+                <td className="p-3 text-center space-x-2">
+                  {/* Edit Button */}
                   <Link
-                    to={`edit/${admin.id}`} // ✅ relative route
+                    to={`edit/${admin.id}`}
                     className="px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
                   >
                     Edit
                   </Link>
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDelete(admin.id)}
+                    className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

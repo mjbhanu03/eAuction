@@ -6,6 +6,7 @@ import {
   getAdminProfile,
   updateAdmin,
   getAdminById,
+  deleteAdmin   // ✅ ADD THIS
 } from "../Controller/adminController.js";
 
 import { loginAdmin } from "../Controller/authController.js";
@@ -52,6 +53,7 @@ router.get("/profile/:id", getAdminProfile);
 router.put("/update-admin/:id", updateAdminProfile);
 router.get("/admin/:id", getAdminById);
 router.put("/admin/update/:id", updateAdmin);
+router.delete("/delete-admin/:id", deleteAdmin);   // ✅ FINAL FIX
 router.put("/user/block/:id", blockUser);
 
 // 🔹 User routes
@@ -66,23 +68,29 @@ router.get("/requested-bids", getRequestedBids);
 router.put("/approve-bid/:id", approveBid);
 router.put("/reject-bid/:id", rejectBid);
 
-// ✅ Active bids routes
+// 🔹 Active bids
 router.get("/active-bids", getActiveBids);
 router.get("/active-bids/:id", getActiveBidById);
 
-// ✅ Bid details route
+// 🔹 Bid details
 router.get("/bids/:id", getBidDetailsWithBidders);
 
-// ✅ Winner routes (added now)
+// 🔹 Winner routes
 router.get("/winner-bids", getAllWinners);
 router.get("/winner-bids/:id", getWinnerById);
 router.post("/winner-bids/:id/mark-paid", markWinnerPaid);
 
-router.get("/bid-history", getCompletedBids); // ✅ fetch all winners
-router.get("/bid-history/:bidId", getBidLogsByBidId); // ✅ optional, get by bid ID
+// 🔹 Bid History routes
+router.get("/bid-history", getCompletedBids);
+router.get("/bid-history/:bidId", getBidLogsByBidId);
 router.get("/bid-history/:bidId/logs", getBidLogsWithUsers);
 
+// 🔹 Entry payments
 router.get("/entry-payments", getAllPaymentsByBid);
 
+import { getDashboardStats } from "../Controller/dashboardController.js";
+
+// ... after other routes
+router.get("/dashboard-stats", getDashboardStats);
 
 export default router;

@@ -4,6 +4,7 @@ import State from "../Models/State.js";
 import Country from "../Models/Country.js";
 import Subregion from "../Models/Subregion.js";
 import Region from "../Models/Region.js";
+import { sendEmail } from "../../Config/sendEmail.js";
 
 // ✅ Proper include chain matching the relationships
 const locationInclude = [
@@ -118,11 +119,57 @@ export const updateUserStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status" });
 
     const user = await User.findByPk(id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
 
     user.status = status;
     await user.save();
-    res.status(200).json({ message: `User ${user.name} ${user.surname} ${status} successfully.` });
+
+    // ------------------------------
+    // 📧 SEND EMAIL ON APPROVAL
+    // ------------------------------
+    if (status === "Approved") {
+      const subject = "🎉 Your E-Auction Account is Approved!";
+      const html = `
+        <h2>Hello ${user.name},</h2>
+        <p style="font-size:16px;">
+          Congratulations! Your account has been <b style="color:green">Approved</b>.
+        </p>
+        
+        <p>You can now login and start participating in auctions.</p>
+
+        <br>
+        <p>Regards,<br><b>E-Auction Team</b></p>
+      `;
+
+      await sendEmail(user.email, subject, html);
+    }
+
+    // ------------------------------
+    // 📧 EMAIL IF REJECTED
+    // ------------------------------
+    if (status === "Rejected") {
+      const subject = "❌ E-Auction Account Rejected";
+      const html = `
+        <h2>Hello ${user.name},</h2>
+        <p style="font-size:16px;">
+          We are sorry to inform you that your account request is 
+          <b style="color:red">Rejected</b>.
+        </p>
+
+        <p>If this is a mistake, please contact support.</p>
+
+        <br>
+        <p>Regards,<br><b>E-Auction Team</b></p>
+      `;
+
+      await sendEmail(user.email, subject, html);
+    }
+
+    res.status(200).json({
+      message: `User ${user.name} ${user.surname} ${status} successfully.`,
+    });
+
   } catch (error) {
     console.error("❌ Error updating user status:", error);
     res.status(500).json({ message: "Error updating user status" });
@@ -146,4 +193,5 @@ export const blockUser = async (req, res) => {
     res.status(500).json({ message: "Error blocking user" });
   }
 };
+
 
