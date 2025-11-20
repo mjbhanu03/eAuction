@@ -1,36 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const RequestedUsers = () => {
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const [users] = useState([
-    {
-      id: 101,
-      name: "Priya Verma",
-      email: "priya@example.com",
-      role: "User",
-      status: "Pending",
-      avatar: "https://i.pravatar.cc/150?img=15",
-    },
-    {
-      id: 102,
-      name: "Karan Patel",
-      email: "karan@example.com",
-      role: "User",
-      status: "Pending",
-      avatar: "https://i.pravatar.cc/150?img=21",
-    },
-  ]);
+  // ✅ Fetch requested users from backend
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get("http://localhost:5000/admin/requested-users");
+        setUsers(res.data || []);
+      } catch (err) {
+        console.error("❌ Error fetching requested users:", err);
+        setError("Failed to fetch requested users.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const requestedUsers = users.filter(
     (u) =>
-      u.status === "Pending" &&
-      (u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()))
+      u.status?.toLowerCase() === "requested" &&
+      (u.name?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email?.toLowerCase().includes(search.toLowerCase()))
   );
+
+  if (loading)
+    return (
+      <p className="text-center text-gray-500 mt-10">Loading requested users...</p>
+    );
+
+  if (error)
+    return (
+      <p className="text-center text-red-500 mt-10">
+        ❌ {error}
+      </p>
+    );
 
   return (
     <motion.div
@@ -45,7 +59,7 @@ const RequestedUsers = () => {
         </span>
       </h1>
 
-      {/* Search */}
+      {/* 🔍 Search */}
       <div className="mb-6 flex justify-between items-center">
         <div className="relative w-full max-w-sm">
           <input
@@ -59,7 +73,7 @@ const RequestedUsers = () => {
         </div>
       </div>
 
-      {/* Requested User Cards */}
+      {/* 🧍 Requested User Cards */}
       {requestedUsers.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {requestedUsers.map((user) => (
@@ -69,14 +83,12 @@ const RequestedUsers = () => {
               className="p-5 bg-white rounded-2xl shadow-lg border border-gray-200 flex items-center gap-4 cursor-pointer"
               onClick={() => navigate(`/admin/requested-users/${user.id}`)}
             >
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-16 h-16 rounded-full border-2 border-purple-400 shadow-md"
-              />
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 text-purple-600 font-bold text-lg border-2 border-purple-400 shadow-md">
+                {user.name?.charAt(0) || "?"}
+              </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-800">
-                  {user.name}
+                  {user.name} {user.surname}
                 </h2>
                 <p className="text-sm text-gray-600">{user.email}</p>
                 <p className="text-sm mt-1">

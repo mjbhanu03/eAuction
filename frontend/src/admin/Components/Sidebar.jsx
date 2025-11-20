@@ -1,34 +1,50 @@
 // src/admin/Components/Sidebar.jsx
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
   CreditCard,
   UserCircle,
-  Settings,
   Gavel,
   Shield,
   ChevronDown,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 
 export default function Sidebar() {
   const loc = useLocation().pathname;
+  const navigate = useNavigate();
+
+  // ✅ get role from localStorage
+  const role = localStorage.getItem("adminRole"); // "admin" | "manager" | "staff"
 
   const active = (path) =>
     loc === path
       ? "bg-gradient-to-r from-white to-white/90 text-[#0b3d91] font-semibold shadow-lg"
       : "text-white/80 hover:bg-white/10 hover:text-white transition";
 
-  // Collapsible menus state
   const [openUsers, setOpenUsers] = useState(true);
   const [openBids, setOpenBids] = useState(true);
   const [openPayments, setOpenPayments] = useState(true);
 
+  // ✅ Logout
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminData");
+    localStorage.removeItem("adminRole");
+    navigate("/admin/login");
+  };
+
+  // 🚫 Staff restriction alert
+  const handleRestrictedClick = (e) => {
+    e.preventDefault();
+    alert("🚫 Access denied: You do not have permission to open this section.");
+  };
+
   return (
     <aside className="w-72 bg-gradient-to-b from-[#0b3d91] via-[#0a2e70] to-[#081d49] text-white min-h-screen rounded-r-3xl shadow-2xl flex flex-col">
-
       {/* Header */}
       <div className="px-6 py-6 border-b border-white/10">
         <div className="text-2xl font-extrabold tracking-wide flex items-center gap-2">
@@ -39,7 +55,6 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="px-4 py-6 flex-1 space-y-3 overflow-y-auto">
-
         {/* Dashboard */}
         <Link
           to="/admin/dashboard"
@@ -56,7 +71,7 @@ export default function Sidebar() {
           <UserCircle size={18} /> <span>Profile</span>
         </Link>
 
-        {/* Users Menu */}
+        {/* Users */}
         <div>
           <button
             onClick={() => setOpenUsers(!openUsers)}
@@ -85,7 +100,7 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Payments Menu */}
+        {/* Payments */}
         <div>
           <button
             onClick={() => setOpenPayments(!openPayments)}
@@ -96,25 +111,38 @@ export default function Sidebar() {
             </span>
             {openPayments ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </button>
+
           {openPayments && (
             <div className="ml-6 mt-1 space-y-1">
+              {/* User Payments - accessible for all */}
               <Link
                 to="/admin/payments"
                 className={`block px-4 py-2 rounded-lg ${active("/admin/payments")}`}
               >
                 User Payments
               </Link>
-              <Link
-                to="/admin/broker-payments"
-                className={`block px-4 py-2 rounded-lg ${active("/admin/broker-payments")}`}
-              >
-                Broker Payments
-              </Link>
+
+              {/* Broker Payments - restricted for staff */}
+              {role === "Employee" ? (
+                <button
+                  onClick={handleRestrictedClick}
+                  className="block w-full text-left px-4 py-2 rounded-lg text-gray-400 cursor-not-allowed"
+                >
+                  Broker Payments 🚫
+                </button>
+              ) : (
+                <Link
+                  to="/admin/broker-payments"
+                  className={`block px-4 py-2 rounded-lg ${active("/admin/broker-payments")}`}
+                >
+                  Broker Payments
+                </Link>
+              )}
             </div>
           )}
         </div>
 
-        {/* Bids Menu */}
+        {/* Bids */}
         <div>
           <button
             onClick={() => setOpenBids(!openBids)}
@@ -157,30 +185,52 @@ export default function Sidebar() {
               >
                 Bids History
               </Link>
-              <Link
-                to="/admin/auction-settings"
-                className={`block px-4 py-2 rounded-lg ${active("/admin/auction-settings")}`}
-              >
-                Auction Settings
-              </Link>
+
+              {/* Auction Settings - restricted for staff */}
+              {role === "Employee" ? (
+                <button
+                  onClick={handleRestrictedClick}
+                  className="block w-full text-left px-4 py-2 rounded-lg text-gray-400 cursor-not-allowed"
+                >
+                  Auction Settings 🚫
+                </button>
+              ) : (
+                <Link
+                  to="/admin/auction-settings"
+                  className={`block px-4 py-2 rounded-lg ${active("/admin/auction-settings")}`}
+                >
+                  Auction Settings
+                </Link>
+              )}
             </div>
           )}
         </div>
 
-        {/* Admin Management */}
-        <Link
-          to="/admin/admin-management"
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl ${active("/admin/admin-management")}`}
-        >
-          <Shield size={18} /> <span>Admin Management</span>
-        </Link>
-
+        {/* Admin Management - restricted for staff */}
+        {role === "Employee" ? (
+          <button
+            onClick={handleRestrictedClick}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 cursor-not-allowed w-full text-left"
+          >
+            <Shield size={18} /> <span>Admin Management 🚫</span>
+          </button>
+        ) : (
+          <Link
+            to="/admin/admin-management"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl ${active("/admin/admin-management")}`}
+          >
+            <Shield size={18} /> <span>Admin Management</span>
+          </Link>
+        )}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white/10">
-        <button className="w-full bg-gradient-to-r from-white/10 to-white/20 hover:from-white/20 hover:to-white/30 text-white rounded-xl px-4 py-2 text-sm flex items-center justify-center gap-2 transition-all duration-300">
-          <Settings size={16} /> Settings
+      <div className="p-4 border-t border-white/10 space-y-2">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl px-4 py-2 text-sm flex items-center justify-center gap-2 transition-all duration-300"
+        >
+          <LogOut size={16} /> Logout
         </button>
       </div>
     </aside>

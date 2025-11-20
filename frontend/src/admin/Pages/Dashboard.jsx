@@ -1,5 +1,6 @@
 // src/admin/Pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,199 +15,241 @@ import {
   Filler
 } from "chart.js";
 import { motion } from "framer-motion";
-import { Gavel, Users, Clock, Tag, TrendingUp, Gift, Search } from "lucide-react";
+import { Gavel, Users, Tag, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend, Filler);
 
 export default function Dashboard() {
-  // --- E-Auction specific stats ---
-  const stats = [
-    { title: "Live Auctions", value: "18", badge: "+5%", icon: <Gavel size={26} />, color: "from-indigo-500 to-indigo-700" },
-    { title: "Active Bidders", value: "1,204", badge: "+8%", icon: <Users size={26} />, color: "from-emerald-500 to-emerald-700" },
-    { title: "Total Listings", value: "3,412", badge: "+2%", icon: <Tag size={26} />, color: "from-yellow-500 to-yellow-700" },
-    { title: "Completed Sales", value: "1,028", badge: "+12%", icon: <Gavel size={26} />, color: "from-pink-500 to-pink-700" }
-  ];
+  const [stats, setStats] = useState(null);
+  const [liveAuctions, setLiveAuctions] = useState([]);
+  const [recentWinners, setRecentWinners] = useState([]);
+  const [topAuctions, setTopAuctions] = useState([]);
+  const [bidsOverTime, setBidsOverTime] = useState({ labels: [], data: [] });
+  const [loading, setLoading] = useState(true);
 
-  // --- Auctions over time (line) ---
+  // Fetch dashboard stats
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get("http://localhost:5000/admin/dashboard-stats");
+        if (res.data?.success) {
+          setStats(res.data.stats);
+          setLiveAuctions(res.data.liveAuctions || []);
+          setRecentWinners(res.data.recentWinners || []);
+          setTopAuctions(res.data.topAuctions || []);
+          setBidsOverTime(res.data.bidsOverTime || { labels: [], data: [] });
+        }
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, []);
+
+  // Search
+  const [query, setQuery] = useState("");
+  const filteredAuctions = liveAuctions.filter(a =>
+    (a.title || "").toLowerCase().includes(query.toLowerCase()) ||
+    String(a.id).includes(query)
+  );
+
+  // Time formatter
+  const formatTimeLeft = (endDateStr) => {
+    if (!endDateStr) return "—";
+    const end = new Date(endDateStr);
+    const now = new Date();
+    const diff = Math.max(0, Math.floor((end - now) / 1000));
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
+
+  // Line chart
   const lineData = {
-    labels: ["Sep 1","Sep 8","Sep 15","Sep 22","Sep 29","Oct 6","Oct 13"],
+    labels: bidsOverTime.labels,
     datasets: [
       {
         label: "Bids per day",
-        data: [120, 200, 150, 300, 250, 420, 380],
+        data: bidsOverTime.data,
         fill: true,
-        backgroundColor: "rgba(99,102,241,0.08)",
+        backgroundColor: (ctx) => {
+          const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+          gradient.addColorStop(0, "rgba(99,102,241,0.15)");
+          gradient.addColorStop(1, "rgba(99,102,241,0)");
+          return gradient;
+        },
         borderColor: "#6366f1",
-        tension: 0.35,
         borderWidth: 3,
-        pointRadius: 3
+        tension: 0.35,
       }
     ]
   };
 
+  // Bar chart
+  const barData = {
+    labels: topAuctions.map(a => a.title),
+    datasets: [{
+      label: "Total Bids",
+      data: topAuctions.map(a => a.bidCount),
+      backgroundColor: ["#34d399", "#60a5fa", "#fbbf24", "#fb7185", "#a78bfa"]
+    }]
+  };
+
   const lineOptions = {
     responsive: true,
-    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
-    interaction: { mode: 'nearest', axis: 'x', intersect: false },
-    scales: { x: { grid: { display: false } }, y: { ticks: { beginAtZero: true } } }
+    plugins: { legend: { display: false } },
+    scales: { x: { grid: { display: false } }, y: { beginAtZero: true } }
   };
 
-  // --- Top auctions (bar) ---
-  const barData = {
-    labels: ["Antique Vase","Luxury Watch","Painting","Classic Car","Rare Coin"],
-    datasets: [{ label: "Total Bids", data: [45, 38, 32, 27, 18], backgroundColor: "rgba(16,185,129,0.9)" }]
-  };
-
-  // --- Sample data lists ---
-  const liveAuctions = [
-    { id: "A-1001", title: "Antique Brass Lamp", current: "₹12,400", timeLeftSec: 7200, bids: 24 },
-    { id: "A-1002", title: "Signed Cricket Bat", current: "₹9,800", timeLeftSec: 3600, bids: 18 },
-    { id: "A-1003", title: "Vintage Radio", current: "₹5,600", timeLeftSec: 5400, bids: 9 }
+  const statCards = [
+    { title: "Live Auctions", value: stats?.liveAuctions ?? 0, icon: <Gavel size={26} />, color: "from-indigo-500 to-purple-500" },
+    { title: "Active Bidders", value: stats?.activeBidders ?? 0, icon: <Users size={26} />, color: "from-emerald-500 to-teal-500" },
+    { title: "Total Listings", value: stats?.totalListings ?? 0, icon: <Tag size={26} />, color: "from-yellow-400 to-orange-400" },
+    { title: "Completed Sales", value: stats?.completedSales ?? 0, icon: <Gavel size={26} />, color: "from-rose-500 to-pink-500" }
   ];
-
-  const recentWinners = [
-    { auction: "A-0909", winner: "Priya K.", amount: "₹42,000" },
-    { auction: "A-0912", winner: "Suresh M.", amount: "₹8,750" }
-  ];
-
-  // --- Countdown helper (client-side state) ---
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const formatTime = (sec) => {
-    const h = Math.floor(sec/3600); const m = Math.floor((sec%3600)/60); const s = sec%60;
-    return `${h}h ${m}m ${s}s`;
-  };
-
-  // --- Search/filter state (UI only) ---
-  const [query, setQuery] = useState("");
-  const filteredAuctions = liveAuctions.filter(a => a.title.toLowerCase().includes(query.toLowerCase()) || a.id.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      {/* Header */}
+    <div className="space-y-6 p-4 md:p-6 bg-gray-50 min-h-screen">
+
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">E‑Auction Admin</h1>
-          <p className="text-sm text-gray-500">Monitor live auctions, bidders and recent activity</p>
+          <h1 className="text-2xl font-bold text-gray-800">E-Auction Admin Dashboard</h1>
+          <p className="text-sm text-gray-500">Monitor auctions, analytics & performance</p>
         </div>
+
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-white rounded-md border px-3 py-1 gap-2">
+          <div className="flex items-center bg-white border px-3 py-1 rounded-lg shadow-sm">
             <Search size={16} className="text-gray-400" />
-            <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search auctions or id" className="text-sm outline-none" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search auctions or id"
+              className="text-sm outline-none ml-2"
+            />
           </div>
-          <button className="px-3 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-md text-sm">Create Auction</button>
         </div>
       </div>
 
-      {/* Stat Cards */}
+      {/* STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((s,i)=>(
-          <motion.div whileHover={{ scale: 1.03 }} key={i} className={`rounded-xl p-4 text-white bg-gradient-to-r ${s.color} shadow-lg relative overflow-hidden`}>
-            <div className="flex items-start justify-between">
+        {statCards.map((card, i) => (
+          <motion.div
+            key={i}
+            whileHover={{ scale: 1.04 }}
+            className={`p-5 rounded-2xl shadow-md text-white bg-gradient-to-r ${card.color} cursor-pointer`}
+          >
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs opacity-90">{s.title}</div>
-                <div className="text-2xl font-bold mt-1">{s.value}</div>
-                <div className="mt-2 text-xs bg-white/20 px-2 py-0.5 rounded-full inline-block">{s.badge}</div>
+                <p className="text-sm opacity-90">{card.title}</p>
+                <h2 className="text-3xl font-bold mt-1">{card.value}</h2>
               </div>
-              <div className="opacity-90">{s.icon}</div>
+              <div className="p-3 bg-white/20 rounded-lg">
+                {card.icon}
+              </div>
             </div>
-            <div className="absolute right-2 bottom-2 text-xs opacity-10 select-none">E‑A</div>
           </motion.div>
         ))}
       </div>
 
-      {/* Main grid */}
+      {/* LIVE AUCTIONS + CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Live auctions list */}
-        <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow col-span-2">
-          <div className="flex items-center justify-between mb-4">
+
+        {/* LIVE AUCTIONS */}
+        <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow-md col-span-2">
+          <div className="flex justify-between mb-4">
             <div>
-              <div className="text-sm text-gray-500">Live Auctions</div>
-              <div className="text-lg font-semibold">Active Listings</div>
+              <p className="text-sm text-gray-500">Live Auctions</p>
+              <h3 className="text-xl font-semibold text-gray-800">Active Listings</h3>
             </div>
-            <div className="text-sm text-gray-500">Updated just now</div>
+            <p className="text-gray-500 text-sm">Updated now</p>
           </div>
 
-          <div className="space-y-3">
-            {filteredAuctions.map((a,idx)=> (
-              <div key={a.id} className="flex items-center justify-between border rounded-lg p-3 hover:shadow-md">
-                <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-indigo-50 rounded-md flex items-center justify-center text-indigo-700 font-semibold">{a.id.split('-')[1]}</div>
-                  <div>
-                    <div className="font-medium">{a.title}</div>
-                    <div className="text-sm text-gray-500">{a.bids} bids • Current {a.current}</div>
+          <div className="space-y-4">
+            {loading ? (
+              <p className="text-center text-gray-500 py-6">Loading auctions...</p>
+            ) : filteredAuctions.length === 0 ? (
+              <p className="text-center text-gray-500 py-6">No active auctions</p>
+            ) : (
+              filteredAuctions.map(a => (
+                <div key={a.id} className="flex items-center justify-between p-4 bg-white border rounded-xl hover:shadow-lg transition">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={a.image1_url ? `http://localhost:5000/photos/${a.image1_url}` : "/no-image.png"}
+                      className="w-16 h-16 rounded-lg object-cover"
+                    />
+                    <div>
+                      <h4 className="font-semibold text-gray-800">{a.title}</h4>
+                      <p className="text-sm text-gray-500">{a.category?.name}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-gray-600 text-sm">{formatTimeLeft(a.end_date)}</p>
+                    <Link
+                      to={`/admin/auction/${a.id}`}
+                      className="text-indigo-600 text-sm underline"
+                    >
+                      View →
+                    </Link>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-gray-600">{formatTime(Math.max(0, Math.floor((a.timeLeftSec - Math.floor((Date.now()-now)/1000)))) )}</div>
-                  <div className="flex gap-2">
-                    <button className="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-md">View</button>
-                    <button className="px-3 py-1 text-sm bg-red-50 text-red-700 rounded-md">End</button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
-          <div className="mt-4 flex justify-center">
-            <button className="px-4 py-2 bg-white border rounded-md text-sm">View all auctions</button>
+          <div className="text-center mt-6">
+            <Link
+              to="/admin/view-all-auctions"
+              className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-md hover:shadow-xl transition transform hover:scale-105"
+            >
+              View All Auctions →
+            </Link>
           </div>
         </motion.div>
 
-        {/* Right column: charts + recent winners */}
+        {/* RIGHT SIDE - CHARTS */}
         <div className="space-y-6">
-          <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow">
-            <div className="mb-3">
-              <div className="text-sm text-gray-500">Activity</div>
-              <div className="text-lg font-semibold">Bids Over Time</div>
-            </div>
-            <div className="h-36">
-              <Line data={lineData} options={lineOptions} />
-            </div>
+
+          {/* Line Chart */}
+          <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow-md">
+            <p className="text-gray-500 text-sm">Activity</p>
+            <h3 className="font-semibold text-gray-800 mb-2">Bids Over Time</h3>
+            <div className="h-40"><Line data={lineData} options={lineOptions} /></div>
           </motion.div>
 
-          <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow">
-            <div className="mb-3 flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500">Top Auctions</div>
-                <div className="text-lg font-semibold">Most Competitive</div>
-              </div>
-              <div className="text-sm text-gray-400">This Week</div>
-            </div>
-            <div className="h-32">
-              <Bar data={barData} options={{ plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } }} />
-            </div>
+          {/* Bar Chart */}
+          <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow-md">
+            <p className="text-gray-500 text-sm">Top Auctions</p>
+            <h3 className="font-semibold text-gray-800 mb-2">Most Competitive</h3>
+            <div className="h-40"><Bar data={barData} /></div>
           </motion.div>
 
-          <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow">
-            <div className="text-sm text-gray-500">Recent Winners</div>
-            <div className="mt-3 space-y-2">
-              {recentWinners.map((r,idx)=> (
+          {/* Recent Winners */}
+          <motion.div whileHover={{ y: -3 }} className="bg-white rounded-xl p-4 shadow-md">
+            <p className="text-gray-500 text-sm">Recent Winners</p>
+            <div className="mt-3 space-y-3">
+              {recentWinners.length === 0 ? (
+                <p className="text-gray-500 text-sm">No winners yet</p>
+              ) : recentWinners.map((r, idx) => (
                 <div key={idx} className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-medium">{r.auction}</div>
-                    <div className="text-xs text-gray-500">{r.winner}</div>
+                    <p className="font-semibold text-gray-800">{r.bid?.title}</p>
+                    <p className="text-gray-500 text-xs">{r.user?.name}</p>
                   </div>
-                  <div className="font-semibold">{r.amount}</div>
+                  <p className="text-indigo-600 font-semibold">₹{r.transaction?.amount}</p>
                 </div>
               ))}
             </div>
           </motion.div>
-        </div>
-      </div>
 
-      {/* Bottom: quick actions and footer */}
-      <div className="bg-white rounded-xl p-4 shadow flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-emerald-400 text-white rounded-md">Start Auction</button>
-          <button className="px-3 py-2 bg-gray-100 rounded-md">Manage Listings</button>
-          <button className="px-3 py-2 bg-gray-100 rounded-md">Manage Bidders</button>
         </div>
-        <div className="text-sm text-gray-500">© {new Date().getFullYear()} E‑Auction • Version 2.0</div>
+
       </div>
     </div>
   );
