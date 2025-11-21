@@ -173,12 +173,7 @@ export default function Sidebar() {
               >
                 Winner Bids
               </Link>
-              <Link
-                to="/admin/bid-logs"
-                className={`block px-4 py-2 rounded-lg ${active("/admin/bid-logs")}`}
-              >
-                Bids Logs
-              </Link>
+              
               <Link
                 to="/admin/bids-history"
                 className={`block px-4 py-2 rounded-lg ${active("/admin/bids-history")}`}

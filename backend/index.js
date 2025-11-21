@@ -64,7 +64,15 @@ app.use("/auth", authRoutes);
 // Bid Routes
 app.use("/bid", bidRoutes);
 
+<<<<<<< HEAD
+app.use((req, res, next) => {
+  console.log("REQUEST:", req.method, req.url);
+  next();
+});
+
+=======
 // Admin side Routes
+>>>>>>> 1892f778c87b70a5c9af622fd306a597e28c22c8
 app.use("/admin", adminRoutes);
 
 // user Payments for Bid
