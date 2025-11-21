@@ -39,6 +39,11 @@ app.use("/auth", authRoutes);
 // Bid Routes
 app.use("/bid", bidRoutes)
 
+app.use((req, res, next) => {
+  console.log("REQUEST:", req.method, req.url);
+  next();
+});
+
 app.use("/admin", adminRoutes);
 
 app.listen(PORT, () => {

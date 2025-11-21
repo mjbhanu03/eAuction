@@ -1,4 +1,3 @@
-// src/admin/Pages/BrokerPaymentDetails.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -7,24 +6,51 @@ export default function BrokerPaymentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [payment, setPayment] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Dummy DB (replace with backend later)
-    const dummy = {
-      1: { id: 1, seller: "Ramesh Traders", finalAmount: 100000, status: "Pending" },
-      2: { id: 2, seller: "Mehta & Sons", finalAmount: 500000, status: "Approved" },
-      3: { id: 3, seller: "Desai Enterprises", finalAmount: 250000, status: "Pending" },
-    };
-    setPayment(dummy[id]);
+    async function loadData() {
+      try {
+        const res = await fetch(`http://localhost:5000/admin/broker-payments/${id}`);
+        const json = await res.json();
+
+        if (json.success) {
+          setPayment(json.data);
+        } else {
+          setPayment(null);
+        }
+      } catch (err) {
+        console.error("Error fetching detail:", err);
+        setPayment(null);
+      }
+      setLoading(false);
+    }
+    loadData();
   }, [id]);
 
-  if (!payment) return <p className="text-center text-gray-500 mt-10">Loading...</p>;
+  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (!payment) return <p className="text-center mt-10">Payment not found.</p>;
 
-  const commission = (payment.finalAmount * 1) / 100;
+  // ================================
+  // APPROVE HANDLER
+  // ================================
+  const handleApprove = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/admin/broker-payments/${payment.bidId}/approve`,
+        { method: "POST" }
+      );
 
-  const handleApprove = () => {
-    alert("✅ Broker Payment Approved!");
-    navigate(-1);
+      const json = await res.json();
+      alert(json.message);
+
+      // redirect user back to list page after approval
+      navigate("/admin/broker-payments");
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
   };
 
   return (
@@ -35,37 +61,45 @@ export default function BrokerPaymentDetails() {
     >
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
+        className="mb-6 px-4 py-2 bg-gray-200 rounded-lg"
       >
         ⬅ Back
       </button>
 
       <div className="bg-white p-6 rounded-2xl shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Broker Payment Details</h2>
-        <p><b>Seller:</b> {payment.seller}</p>
-        <p><b>Final Amount:</b> ₹{payment.finalAmount.toLocaleString()}</p>
-        <p><b>Broker Fee (1%):</b> ₹{commission.toLocaleString()}</p>
-        <p>
-          <b>Status:</b>{" "}
-          <span
-            className={`px-2 py-1 rounded ${
-              payment.status === "Approved"
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}
-          >
-            {payment.status}
-          </span>
-        </p>
 
-        {payment.status !== "Approved" && (
-          <button
-            onClick={handleApprove}
-            className="mt-6 w-full bg-blue-600 text-white py-2 rounded-xl shadow hover:bg-blue-700"
-          >
-            ✅ Approve Payment
-          </button>
-        )}
+        {/* ================= WINNER INFO =============== */}
+        <h3 className="text-xl font-semibold mt-4 mb-2">🏆 Winner Details</h3>
+        <p><b>Name:</b> {payment.winner?.name}</p>
+        <p><b>Email:</b> {payment.winner?.email}</p>
+        <p><b>Phone:</b> {payment.winner?.phone}</p>
+        <p><b>City:</b> {payment.winner?.city?.name}</p>
+
+        <hr className="my-4" />
+
+        {/* ================= SELLER INFO =============== */}
+        <h3 className="text-xl font-semibold mt-4 mb-2">👤 Seller Details</h3>
+        <p><b>Name:</b> {payment.seller?.name}</p>
+        <p><b>Email:</b> {payment.seller?.email}</p>
+        <p><b>Phone:</b> {payment.seller?.phone}</p>
+        <p><b>City:</b> {payment.seller?.city?.name}</p>
+
+        <hr className="my-4" />
+
+        {/* ================= PRODUCT INFO =============== */}
+        <h3 className="text-xl font-semibold mt-4 mb-2">📦 Product Details</h3>
+        <p><b>Product:</b> {payment.bidTitle}</p>
+        <p><b>Final Price:</b> ₹{Number(payment.finalPrice).toLocaleString()}</p>
+        <p><b>Commission Rate:</b> {payment.commissionRate}%</p>
+        <p><b>Commission Amount:</b> ₹{Number(payment.commissionAmount).toLocaleString()}</p>
+
+        <button
+          onClick={handleApprove}
+          className="mt-6 w-full bg-green-600 text-white py-2 rounded-xl shadow"
+        >
+          ✅ Approve Payment
+        </button>
       </div>
     </motion.div>
   );
