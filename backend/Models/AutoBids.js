@@ -9,9 +9,10 @@ const AutoBid = sequelize.define("AutoBid", {
   max_bid: { type: DataTypes.INTEGER, allowNull: false },
   active: { type: DataTypes.BOOLEAN, defaultValue: true },
   last_bid_amount: { type: DataTypes.INTEGER, allowNull: true },
-  last_bid_at: { type: DataTypes.DATE, allowNull: true },
+  min_increment: { type: DataTypes.INTEGER, allowNull: true },
 }, {
   tableName: "auto_bids",
+  timestamps: false 
 });
 
 export default AutoBid;

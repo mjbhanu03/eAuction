@@ -28,7 +28,10 @@
 
 const fetchMyAutoBid = async () => {
   try {
-    const res = await fetch("http://localhost:5000/my-auto-bids", { credentials: "include" });
+  const user = JSON.parse(localStorage.getItem("user"));
+    const user_id = user.id
+    const bid_id = product.id
+    const res = await fetch(`http://localhost:5000/bid/my-auto-bids/${user_id}/${bid_id}`, { credentials: "include" });
     if (!res.ok) return;
     const arr = await res.json();
     const rec = arr.find(r => Number(r.bid_id) === Number(product.id));
@@ -208,15 +211,18 @@ const handleAutoBidSubmit = async (e) => {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) return alert("Please login to set auto-bid");
 
-  const maxBudget = Number(autoBid.maxBudget);
+  const maxBudget = autoBid.maxBudget;
+  if (!maxBudget || maxBudget <= 0) return alert("Enter valid max budget");
+  const minIncrement = autoBid.minIncrement;
   if (!maxBudget || maxBudget <= 0) return alert("Enter valid max budget");
 
   try {
+    console.log(user.id, maxBudget, minIncrement, currentBid)
     const res = await fetch("http://localhost:5000/bid/auto-bids", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ bid_id: product.id, max_bid: maxBudget, active: true })
+      body: JSON.stringify({ user_id:user.id, bid_id: product.id, max_bid: maxBudget, active: true, min_increment: minIncrement, current_bid: currentBid })
     });
     const json = await res.json();
     if (!res.ok) {

@@ -158,26 +158,26 @@ router.get("/fetchAllBidsLogs/:id", async (req, res) => {
 });
 
 // Create or update auto-bid (toggle)
-router.post("/auto-bids", auth, async (req, res) => {
+router.post("/auto-bids", async (req, res) => {
   // req.user must exist from auth middleware
   try {
     const userId = req.user?.id || req.body.user_id;
-    const { bid_id, max_bid, active } = req.body;
+    const {bid_id, max_bid, active, min_increment, current_bid } = req.body;
     if (!userId || !bid_id || !max_bid) return res.status(400).json({ message: "Missing fields" });
-
+    console.log(userId, bid_id, max_bid, active, min_increment)
     // upsert
-    const [record, created] = await AutoBid.findOrCreate({
+    const data = await AutoBid.findOrCreate({
       where: { user_id: userId, bid_id },
-      defaults: { max_bid, active: active ?? true, last_bid_amount: null }
+      defaults: { max_bid, active: active ?? true, last_bid_amount: min_increment+current_bid, min_increment: min_increment }
     });
 
-    if (!created) {
-      record.max_bid = max_bid;
-      record.active = typeof active === "boolean" ? active : record.active;
-      await record.save();
-    }
+    // if (!created) {
+    //   record.max_bid = max_bid;
+    //   record.active = typeof active === "boolean" ? active : record.active;
+    //   await record.save();
+    // }
 
-    return res.json({ success: true, data: record });
+    return res.json({ success: true, data: data });
   } catch (err) {
     console.error("auto-bid create error", err);
     return res.status(500).json({ message: "Server error" });
@@ -185,10 +185,11 @@ router.post("/auto-bids", auth, async (req, res) => {
 });
 
 // Get current user's autobids
-router.get("/my-auto-bids", auth, async (req, res) => {
+router.get("/my-auto-bids/:userid/:bidid", async (req, res) => {
   try {
-    const userId = req.user.id;
-    const data = await AutoBid.findAll({ where: { user_id: userId } });
+    const userId = req.params.userid;
+    const bidId = req.params.bidid;
+    const data = await AutoBid.findAll({ where: { user_id: userId, bid_id:bidId } });
     return res.json(data);
   } catch (err) {
     console.error("my-auto-bids error", err);
