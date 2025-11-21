@@ -3,7 +3,11 @@ import Bid from "../Models/Bid.js";
 import BidLogs from "../Models/BidsLogs.js";
 import upload from "../Middleware/bidMulter.js";
 import multer, { MulterError } from "multer";
-
+import checkPayment from "../Middleware/checkPayment.js";
+import auth from "../Middleware/authMiddleware.js";
+import BidsLog from "../Admin/Models/BidsLog.js";
+import { processAutoBids } from "../Helper/autoBidProcessor.js";
+import AutoBid from "../Models/AutoBids.js";
 const router = express.Router();
 
 // ====================
@@ -13,7 +17,7 @@ router.get("/", async (req, res) => {
   try {
     const data = await Bid.findAll({
       attributes: { exclude: ["createdAt", "updatedAt"] },
-      where: {status: 'Active'}
+      where: { status: "Active" },
     });
     return res.status(200).json(data);
   } catch (error) {
@@ -69,7 +73,7 @@ router.post(
         image3_url: files["imageThree"]?.[0]?.filename || "",
         image4_url: files["imageFour"]?.[0]?.filename || "",
         price,
-        docs: JSON.stringify(documentFiles)
+        docs: JSON.stringify(documentFiles),
       });
 
       return res.status(201).json({ message: "Bid created successfully!" });
@@ -102,19 +106,20 @@ router.use((err, req, res, next) => {
 
 router.post("/placeBid", async (req, res) => {
   try {
-    const { bid_id, user_id, price } = req.body;
+    const { bid_id, user_id,price } = req.body;
 
-    // Log bid in BidLogs table
     await BidLogs.create({
       bid_id,
       user_id,
-      price: price
+      price: price,
     });
-
-    return res.status(200).json({
-      message: "Bid placed successfully!",
-      current_price: price,
-    });
+   await processAutoBids(bid_id);
+    return res
+      .status(200)
+      .json({
+        message: "Bid placed successfully!",
+        currentPrice: price,
+      });
   } catch (error) {
     console.error("Error placing bid:", error);
     return res
@@ -123,20 +128,87 @@ router.post("/placeBid", async (req, res) => {
   }
 });
 
-router.get('/fetchAllBidsLogs/:id', async (req, res) => {
+router.get("/highestBid/:id", async(req, res)=>{
+  const bidId = req.params.id;
+
+  try{
+    const data = await BidsLog.max("price",{
+      where:{bid_id: bidId}  })
+      console.log(data)
+    res.json({price: data})
+  }catch(error){
+    console.log(error)
+  }
+})
+
+router.get("/fetchAllBidsLogs/:id", async (req, res) => {
   const bidId = req.params.id;
 
   try {
     const data = await BidLogs.findAll({
       where: { bid_id: bidId },
-      order: [['price', 'DESC']], // optional: latest first
+      order: [["price", "DESC"]], // optional: latest first
     });
-
+    console.log('yes')
     res.json(data);
   } catch (err) {
     console.error("Error fetching bid logs:", err);
     res.status(500).json({ message: "Something went wrong" });
   }
 });
+
+// Create or update auto-bid (toggle)
+router.post("/auto-bids", auth, async (req, res) => {
+  // req.user must exist from auth middleware
+  try {
+    const userId = req.user?.id || req.body.user_id;
+    const { bid_id, max_bid, active } = req.body;
+    if (!userId || !bid_id || !max_bid) return res.status(400).json({ message: "Missing fields" });
+
+    // upsert
+    const [record, created] = await AutoBid.findOrCreate({
+      where: { user_id: userId, bid_id },
+      defaults: { max_bid, active: active ?? true, last_bid_amount: null }
+    });
+
+    if (!created) {
+      record.max_bid = max_bid;
+      record.active = typeof active === "boolean" ? active : record.active;
+      await record.save();
+    }
+
+    return res.json({ success: true, data: record });
+  } catch (err) {
+    console.error("auto-bid create error", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get current user's autobids
+router.get("/my-auto-bids", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const data = await AutoBid.findAll({ where: { user_id: userId } });
+    return res.json(data);
+  } catch (err) {
+    console.error("my-auto-bids error", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// disable/delete
+router.delete("/auto-bids/:id", auth, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const rec = await AutoBid.findByPk(id);
+    if (!rec) return res.status(404).json({ message: "Not found" });
+    await rec.destroy();
+    return res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 export default router;
