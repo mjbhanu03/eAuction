@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Card from "./Card.jsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const AutoScroll = ({ count = 8, pxPerSec = 80 }) => {
+const AutoScroll = ({ count = 8, pxPerSec = 220 }) => {
   const containerRef = useRef(null);
   const rafRef = useRef(null);
   const lastRef = useRef(null);
