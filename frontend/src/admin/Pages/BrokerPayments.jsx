@@ -1,16 +1,40 @@
-// src/admin/Pages/BrokerPayments.jsx
-import { useState } from "react";
+// frontend/src/pages/admin/BrokerPayments.jsx
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 export default function BrokerPayments() {
   const navigate = useNavigate();
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [payments] = useState([
-    { id: 1, seller: "Ramesh Traders", finalAmount: 100000, status: "Pending" },
-    { id: 2, seller: "Mehta & Sons", finalAmount: 500000, status: "Approved" },
-    { id: 3, seller: "Desai Enterprises", finalAmount: 250000, status: "Pending" },
-  ]);
+  const fetchPayments = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/admin/broker-payments");
+      const json = await res.json();
+
+      if (json.success) setPayments(json.data || []);
+      else setPayments([]);
+    } catch (err) {
+      console.error("Error fetching broker payments:", err);
+      setPayments([]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  if (loading) return <p className="text-center mt-8">Loading...</p>;
+
+  if (!payments.length)
+    return (
+      <p className="text-center mt-8 text-gray-500">
+        No broker payments yet.
+      </p>
+    );
 
   return (
     <motion.div
@@ -21,35 +45,30 @@ export default function BrokerPayments() {
       <h1 className="text-3xl font-bold mb-6 text-blue-800">💰 Broker Payments</h1>
 
       <div className="grid gap-4">
-        {payments.map((p) => {
-          const commission = (p.finalAmount * 1) / 100; // always 1%
-          return (
-            <div
-              key={p.id}
-              className="flex items-center justify-between bg-white p-5 rounded-xl shadow-md border hover:shadow-lg transition cursor-pointer"
-              onClick={() => navigate(`/admin/broker-payments/${p.id}`)}
-            >
-              <div>
-                <h2 className="font-semibold text-gray-800">{p.seller}</h2>
-                <p className="text-sm text-gray-500">
-                  Final Amount: ₹{p.finalAmount.toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Broker Fee (1%): <span className="text-green-600 font-semibold">₹{commission.toLocaleString()}</span>
-                </p>
-              </div>
-              <span
-                className={`px-3 py-1 text-xs rounded-full ${
-                  p.status === "Approved"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {p.status}
-              </span>
+        {payments.map((p) => (
+          <div
+            key={p.bidId}
+            className="flex items-center justify-between bg-white p-5 rounded-xl shadow-md border hover:shadow-lg cursor-pointer"
+            onClick={() => navigate(`/admin/broker-payments/${p.bidId}`)}
+          >
+            <div>
+              <h2 className="font-semibold text-gray-800">
+                {p.winner?.name || "Unknown"}
+              </h2>
+              <p className="text-sm text-gray-500">Product: {p.bidTitle}</p>
+              <p className="text-sm text-gray-500">
+                Final Price: ₹{Number(p.finalPrice).toLocaleString()}
+              </p>
+              <p className="text-sm text-gray-500">
+                Commission: ₹{Number(p.commissionAmount).toLocaleString()}
+              </p>
             </div>
-          );
-        })}
+
+            <span className="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
+              Winner
+            </span>
+          </div>
+        ))}
       </div>
     </motion.div>
   );

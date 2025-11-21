@@ -7,81 +7,59 @@ import Transaction from "../Models/Transaction.js";
 //  GET ALL WINNERS
 // ============================
 export const getAllWinners = async (req, res) => {
-  try {
-    const winners = await Winner.findAll({
-      include: [
-        {
-          model: User,
-          as: "user",
-          attributes: ["id", "name", "email", "number"],
-        },
-        {
-          model: Bid,
-          as: "bid",
-          attributes: [
-            "id",
-            "title",
-            "price",
-            "end_date",
-            "image1_url",
-            "image2_url",
-            "image3_url",
-            "image4_url",
-          ],
-        },
-        {
-          model: Transaction,
-          as: "transaction",
-          attributes: ["id", "amount"],
-        },
-      ],
-    });
+try {
+const winners = await Winner.findAll({
+include: [
+{ model: User, as: "user", attributes: ["id", "name", "email", "number"] },
+{ model: Bid, as: "bid", attributes: ["id", "title", "price", "end_date", "image1_url", "image2_url", "image3_url", "image4_url"] },
+{ model: Transaction, as: "transaction", attributes: ["id", "amount"] },
+],
+order: [["id", "DESC"]],
+});
 
-    if (!winners.length) {
-      return res.status(200).json({ success: true, data: [] });
-    }
 
-    const formatted = winners.map((w) => {
-      const imageFields = [
-        w.bid?.image1_url,
-        w.bid?.image2_url,
-        w.bid?.image3_url,
-        w.bid?.image4_url,
-      ].filter(Boolean);
+const formatted = winners.map((w) => {
+const imageFields = [
+w.bid?.image1_url,
+w.bid?.image2_url,
+w.bid?.image3_url,
+w.bid?.image4_url,
+].filter(Boolean);
 
-      const imageUrls = imageFields.map((img) => {
-        if (!img.startsWith("http")) {
-          img = img.replace(/^\/+/, "");
-          return `http://localhost:5000/photos/${img.split("/").pop()}`;
-        }
-        return img;
-      });
 
-      return {
-        id: w.id,
-        itemName: w.bid?.title || "N/A",
-        images: imageUrls,
-        winnerName: w.user?.name || "N/A",
-        winnerEmail: w.user?.email || "N/A",
-        winnerPhone: w.user?.number || "N/A",
-        winningAmount: w.transaction?.amount || w.bid?.price || 0,
-        currency: "INR",
-        endDate: w.bid?.end_date || null,
-        winDate: w.bid?.end_date || null,
-        invoiceUrl: `/invoices/${w.id}.pdf`,
-      };
-    });
+const imageUrls = imageFields.map((img) => {
+if (!img.startsWith("http")) {
+img = img.replace(/^\/+/, "");
+return `http://localhost:5000/photos/${img.split("/").pop()}`;
+}
+return img;
+});
 
-    res.status(200).json({ success: true, data: formatted });
-  } catch (error) {
-    console.error("Error fetching winners:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch winner data.",
-      error: error.message,
-    });
-  }
+
+return {
+id: w.id,
+itemName: w.bid?.title || "N/A",
+images: imageUrls,
+winnerName: w.user?.name || "N/A",
+winnerEmail: w.user?.email || "N/A",
+winnerPhone: w.user?.number || "N/A",
+winningAmount: w.transaction?.amount || w.bid?.price || 0,
+currency: "INR",
+endDate: w.bid?.end_date || null,
+winDate: w.bid?.end_date || null,
+invoiceUrl: `/invoices/${w.id}.pdf`,
 };
+});
+
+
+res.status(200).json({ success: true, data: formatted });
+} catch (error) {
+console.error("Error fetching winners:", error);
+res.status(500).json({ success: false, message: "Failed to fetch winner data.", error: error.message });
+}
+};
+
+
 
 // ============================
 //  GET SINGLE WINNER BY ID
@@ -193,3 +171,4 @@ export const markWinnerPaid = async (req, res) => {
     });
   }
 };
+
